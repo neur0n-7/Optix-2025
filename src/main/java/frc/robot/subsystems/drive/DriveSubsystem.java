@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
 
-	SparkMax motor = new SparkMax(22, MotorType.kBrushless);
+	private final SparkMax motor = new SparkMax(22, MotorType.kBrushless);
     private final PIDController pid = new PIDController(0.1, 0.0, 0.0);
 
     private double setpoint = 0.0;
