@@ -10,7 +10,7 @@ import frc.robot.subsystems.drive.DriveSubsystem;
 /** An example command that uses an example subsystem. */
 public class Drive extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  
+
   public Drive(DriveSubsystem subsystem) {
     m_subsystem = subsystem;
     // Use addRequirements() here to declare subsystem dependencies.
@@ -34,8 +34,8 @@ public class Drive extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_subsystem.setMotorVoltage(5.0);
-    System.out.println("Motor is running...");
+    m_subsystem.setMotorVoltagePID(5.0);
+    // System.out.println("Motor is running...");
   }
 
   // Called once the command ends or is interrupted.

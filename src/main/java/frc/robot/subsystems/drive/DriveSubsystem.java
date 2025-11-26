@@ -7,24 +7,31 @@ package frc.robot.subsystems.drive;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
 
 	SparkMax motor = new SparkMax(22, MotorType.kBrushless);
+    private final PIDController pid = new PIDController(0.1, 0.0, 0.0);
 
-	public DriveSubsystem() {}
+    private double setpoint = 0.0;
+	private double simulatedVoltage = 0.0;
 
+	public DriveSubsystem() {
+		pid.setTolerance(0.05);
+	}
 
+	// set voltage WITHOUT pid
 	public void setMotorVoltage(double volts) {
 		motor.setVoltage(volts);
 	}
-	
-	public void stopMotor() {
-		motor.setVoltage(0.0);
-	}
 
+	public void setMotorVoltagePID(double volts){
+		setpoint = volts;
+	}
 	
 	/**
 	 * Example command factory method.
@@ -54,12 +61,34 @@ public class DriveSubsystem extends SubsystemBase {
   public void periodic() {
 	// This method will be called once per scheduler run
 
-	// TODO: ADD LOGGING HERE
+	// Update PID
+	double currentVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
+	double output = pid.calculate(currentVoltage, setpoint);
+
+	// clamp from -12 to 12 v
+	output = Math.max(Math.min(output, 12.0), -12.0);
+
+	motor.setVoltage(output);
+
+	simulatedVoltage = output;
+
+	// logging
+
+	SmartDashboard.putNumber("Drive/Setpoint", setpoint);
+	SmartDashboard.putNumber("Drive/ActualVoltage", currentVoltage);
+	SmartDashboard.putNumber("Drive/PIDOutputVoltage", output);
+	SmartDashboard.putNumber("Drive/SimulatedVoltage", simulatedVoltage);
+
+
 
   }
 
   @Override
   public void simulationPeriodic() {
 	// This method will be called once per scheduler run during simulation
+	double applied = motor.getAppliedOutput() * 12.0;
+	simulatedVoltage += (applied - simulatedVoltage) * 0.1;
+	SmartDashboard.putNumber("Drive/Sim Voltage (sim)", simulatedVoltage);
+
   }
 }
