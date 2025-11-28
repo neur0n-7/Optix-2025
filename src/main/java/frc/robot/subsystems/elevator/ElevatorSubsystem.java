@@ -7,24 +7,23 @@ package frc.robot.subsystems.elevator;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorStates;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
     private final SparkMax motor = new SparkMax(22, MotorType.kBrushless);
-    private final PIDController pid = new PIDController(ElevatorConstants.kP, ElevatorConstants.kI, ElevatorConstants.kD);
 
     private ElevatorStates state = ElevatorStates.LOWEST;
+    private double setpoint = 0.0; // in meters
 
-    private double setpoint = 0.0;
-
-    private ProfiledPIDController profile = new ProfiledPIDController(
-            0, 0, 0, 
+    private ProfiledPIDController profiled = new ProfiledPIDController(
+            ElevatorConstants.kP, ElevatorConstants.kI, ElevatorConstants.kD,
             new TrapezoidProfile.Constraints(
                 ElevatorConstants.maxVelocity,
                 ElevatorConstants.maxAccel
@@ -39,13 +38,47 @@ public class ElevatorSubsystem extends SubsystemBase {
     );
 
     public ElevatorSubsystem() {
-        pid.setTolerance(0.05);
+        profiled.setTolerance(0.02);
     }
+
+    public void setTarget(double meters){
+        setpoint = meters;
+        profiled.setGoal(meters);
+    }
+
+    private double getHeight(){
+        // TODO: finish ts
+        System.out.print(motor.getEncoder().getPosition());
+        return 0.0;
+    }
+
+    public boolean atSetpoint(){ return profiled.atGoal(); }
 
 
     @Override
     public void periodic() {
-        double currentVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
+        double currentPosition = getHeight();
+
+        double ffVolts = feedforward.calculate(
+            profiled.getSetpoint().velocity,
+            0
+        );
+        double pidOutput = profiled.calculate(currentPosition);
+
+        double totalVolts = MathUtil.clamp(ffVolts + pidOutput, -12, 12);
+
+        motor.setVoltage(totalVolts);
+
+        // Logging
+        SmartDashboard.putNumber("Elevator/Setpoint", setpoint);
+        SmartDashboard.putNumber("Elevator/CurrentPos", currentPosition);
+        SmartDashboard.putNumber("Elevator/Velocity", profiled.getSetpoint().velocity);
+        SmartDashboard.putNumber("Elevator/PID Output (V)", pidOutput);
+        SmartDashboard.putNumber("Elevator/FF Output (V)", ffVolts);
+        SmartDashboard.putNumber("Elevator/Total Voltage", totalVolts);
+        SmartDashboard.putString("Elevator/State", state.toString());
+
+
     }
 
     @Override

@@ -21,6 +21,7 @@ public class ElevatorConstants {
 
     public enum ElevatorStates {
         LOWEST(0),
+        MIDDLE(3),
         HIGHEST(6);
 
         public final int position;
