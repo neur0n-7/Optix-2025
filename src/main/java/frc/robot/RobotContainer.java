@@ -113,8 +113,8 @@ public class RobotContainer {
 	 * joysticks}.
 	 */
 	private void configureBindings() {
-		m_driverController.a().whileTrue(m_Drive);
-		m_driverController.a().whileFalse(m_StopDriving);
+		m_driverController.leftBumper().onTrue(m_Drive);
+		m_driverController.rightBumper().onTrue(m_StopDriving);
 
 		m_driverController.x().onTrue(m_GoToElevatorHighest);
 		m_driverController.y().onTrue(m_GoToElevatorLowest);
