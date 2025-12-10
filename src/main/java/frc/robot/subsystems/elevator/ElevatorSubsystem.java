@@ -79,6 +79,25 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
-        // This method will be called once per scheduler run during simulation
+        double currentPosition = getHeight();
+
+        double ffVolts = feedforward.calculate(
+            profiled.getSetpoint().velocity,
+            0
+        );
+        double pidOutput = profiled.calculate(currentPosition);
+
+        double totalVolts = MathUtil.clamp(ffVolts + pidOutput, -12, 12);
+
+        motor.setVoltage(totalVolts);
+
+        // Logging
+        SmartDashboard.putNumber("Elevator/Setpoint", setpoint);
+        SmartDashboard.putNumber("Elevator/CurrentPos", currentPosition);
+        SmartDashboard.putNumber("Elevator/Velocity", profiled.getSetpoint().velocity);
+        SmartDashboard.putNumber("Elevator/PID Output (V)", pidOutput);
+        SmartDashboard.putNumber("Elevator/FF Output (V)", ffVolts);
+        SmartDashboard.putNumber("Elevator/Total Voltage", totalVolts);
+        SmartDashboard.putString("Elevator/State", state.toString());
     }
 }
