@@ -1,4 +1,4 @@
-package frc.robot.subsystems.driveV2;
+package frc.robot.subsystems.motor;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;

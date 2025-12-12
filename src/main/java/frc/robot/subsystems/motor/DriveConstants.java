@@ -1,4 +1,4 @@
-package frc.robot.subsystems.driveV2;
+package frc.robot.subsystems.motor;
 
 public class DriveConstants {
 
