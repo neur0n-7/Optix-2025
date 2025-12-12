@@ -42,6 +42,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 		// logging
 		SmartDashboard.putNumber("Drive/TargetDegs", targetDegrees);
+		SmartDashboard.putNumber("Drive/CurrentDegs", currentDegrees);
 		SmartDashboard.putNumber("Drive/ActualVoltage", currentVoltage);
 		SmartDashboard.putNumber("Drive/PIDOutputVoltage", output);
 
