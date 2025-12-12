@@ -26,7 +26,7 @@ public class ArmConstants {
 
         public final int position_degs;
 
-        ElevatorStates(int position_degs) {
+        ArmStates(int position_degs) {
             this.position_degs = position_degs;
         }
     }
