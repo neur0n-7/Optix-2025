@@ -28,8 +28,9 @@ import frc.robot.subsystems.ExampleSubsystem;
 
 import frc.robot.subsystems.RealNeoMotor;
 import frc.robot.subsystems.SimNeoMotor;
-import frc.robot.subsystems.elevatorV2.V2ElevatorConstants;
+
 // ELEVATOR V2
+import frc.robot.subsystems.elevatorV2.V2ElevatorConstants;
 import frc.robot.subsystems.elevatorV2.V2ElevatorSubsystem;
 
 public class RobotContainer {
@@ -96,11 +97,10 @@ public class RobotContainer {
 		// m_GoToElevatorLowest = new GoToElevatorHeight(m_ElevatorSubsystem, ElevatorConstants.ElevatorStates.LOWEST);
 		// m_GoToElevatorMiddle = new GoToElevatorHeight(m_ElevatorSubsystem, ElevatorConstants.ElevatorStates.MIDDLE);
 
-		// ELEVATOR V1 ////////////////////
+		// ELEVATOR V2 ////////////////////
 		m_GoToElevatorLowest = new SetElevatorState(m_ElevatorSubsystem2, V2ElevatorConstants.ElevatorStates.LOWEST);
 		m_GoToElevatorMiddle = new SetElevatorState(m_ElevatorSubsystem2, V2ElevatorConstants.ElevatorStates.MIDDLE);
 		m_GoToElevatorHighest = new SetElevatorState(m_ElevatorSubsystem2, V2ElevatorConstants.ElevatorStates.HIGHEST);
-
 
 		// DRIVE ////////////////////
 		// m_GoTo90Degrees = new GoToDegrees(m_DriveSubsystem, 90);

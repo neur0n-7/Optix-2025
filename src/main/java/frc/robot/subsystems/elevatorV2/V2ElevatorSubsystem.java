@@ -19,9 +19,13 @@ public class V2ElevatorSubsystem extends SubsystemBase {
     private final ProfiledPIDController pidController;
     private final ElevatorFeedforward feedforward;
 
-    private double lastVelocity = 0.0;
+    private double lastSetpointVelocity = 0.0;
 
-    private double setpointMeters = 0.0;
+    private double lastActualHeight = 0.0;
+    private double lastActualVelocity = 0.0;
+
+
+    private double targetMeters = 0.0;
 
     private ElevatorStates state = ElevatorStates.LOWEST;
 
@@ -66,7 +70,7 @@ public class V2ElevatorSubsystem extends SubsystemBase {
 
     public void setTargetState(ElevatorStates targetState){
         pidController.setGoal(targetState.position);
-        setpointMeters = targetState.position;
+        targetMeters = targetState.position;
         state = targetState;
     }
 
@@ -82,31 +86,41 @@ public class V2ElevatorSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        double position = getHeight();
+        double currentPosition = getHeight();
 
-        double pidVolts = pidController.calculate(position);
+        double pidVolts = pidController.calculate(currentPosition);
 
         TrapezoidProfile.State setpoint = pidController.getSetpoint();
 
-        double currentVelocity = setpoint.velocity;
-        double acceleration = (currentVelocity - lastVelocity) / 0.02;
-        
-        lastVelocity = currentVelocity;
+        double setpointVelocity = setpoint.velocity;
+        double setpointAcceleration = (setpointVelocity - lastSetpointVelocity) / 0.02;
+        lastSetpointVelocity = setpointVelocity;
 
-        double ffVolts = feedforward.calculate(currentVelocity, acceleration);
+        double actualVelocity = (currentPosition - lastActualHeight) / 0.02;
+        double actualAccel = (actualVelocity - lastActualVelocity) / 0.02;
+
+        lastActualHeight = currentPosition;
+        lastActualVelocity = actualVelocity;
+
+
+        double ffVolts = feedforward.calculate(setpointVelocity, setpointAcceleration);
 
         double outputVolts = MathUtil.clamp(pidVolts + ffVolts, -12.0, 12.0);
         motor.setVoltage(outputVolts);
 
-        elevatorMech.setLength(V2ElevatorConstants.elevatorBaseHeight + position);
+        elevatorMech.setLength(V2ElevatorConstants.elevatorBaseHeight + currentPosition);
 
-        SmartDashboard.putNumber("ElevatorV2/Position", position);
-        SmartDashboard.putNumber("ElevatorV2/Setpoint", setpointMeters);
-        SmartDashboard.putString("ElevatorV2/Target State", state.toString());
-        SmartDashboard.putNumber("ElevatorV2/Error", setpointMeters - position);
+        SmartDashboard.putNumber("ElevatorV2/Position", currentPosition);
+        SmartDashboard.putNumber("ElevatorV2/Target", targetMeters);
+        // SmartDashboard.putString("ElevatorV2/Target State", state.toString());
+        // SmartDashboard.putNumber("ElevatorV2/Error", targetMeters - currentPosition);
 
-        SmartDashboard.putNumber("ElevatorV2/Velocity", currentVelocity);
-        SmartDashboard.putNumber("ElevatorV2/Acceleration", acceleration);
+
+        SmartDashboard.putNumber("ElevatorV2/Velocity (Setpoint)", setpointVelocity);
+        SmartDashboard.putNumber("ElevatorV2/Velocity (Actual)", actualVelocity);
+        
+        SmartDashboard.putNumber("ElevatorV2/Acceleration (Setpoint)", setpointAcceleration);
+        SmartDashboard.putNumber("ElevatorV2/Acceleration (Actual)", actualAccel);
 
         SmartDashboard.putNumber("ElevatorV2/PID Volts", pidVolts);
         SmartDashboard.putNumber("ElevatorV2/FF Volts", ffVolts);
@@ -114,6 +128,13 @@ public class V2ElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putBoolean("ElevatorV2/At Target", atTarget());
         SmartDashboard.putData("ElevatorV2/Mech2d", mech);
 
+        /*
+        System.out.println("PERIODIC CALLED");
+        System.out.println(
+            "POS %f, SETPT %f, VELOCITY %f, ACCEL %f, PID V %f, FF V %f".formatted(
+                position, setpointMeters, currentVelocity, acceleration, pidVolts, ffVolts)
+        );
+         */
     
     }
 

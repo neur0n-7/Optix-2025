@@ -19,7 +19,7 @@ public class SimElevatorMotor implements NeoMotor {
             V2ElevatorConstants.drumDiameter / 2.0,
             V2ElevatorConstants.elevatorBaseHeight,
             V2ElevatorConstants.elevatorBaseHeight + V2ElevatorConstants.ElevatorStates.HIGHEST.position,
-            true,
+            false,
             V2ElevatorConstants.elevatorBaseHeight
         );
     }
