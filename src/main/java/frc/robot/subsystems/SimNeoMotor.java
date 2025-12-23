@@ -46,8 +46,8 @@ public class SimNeoMotor implements NeoMotor {
         sim.update(dtSeconds);
 
         double radPerSec = sim.getAngularVelocityRadPerSec();
-        SmartDashboard.putNumber("ElevatorV2/RadsPerSec", radPerSec);
-        SmartDashboard.putNumber("ElevatorV2/DtSeconds", dtSeconds);
+        // SmartDashboard.putNumber("ElevatorV2/RadsPerSec", radPerSec);
+        // SmartDashboard.putNumber("ElevatorV2/DtSeconds", dtSeconds);
 
         positionRotations += (radPerSec * dtSeconds) / (2.0 * Math.PI);
 

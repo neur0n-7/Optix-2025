@@ -17,30 +17,28 @@ import frc.robot.subsystems.ExampleSubsystem;
 // import frc.robot.subsystems.swerve.SwerveSubsystem;
 
 // DRIVE
-import frc.robot.subsystems.drive.DriveSubsystem;
-import frc.robot.commands.drive.GoToDegrees;
+// import frc.robot.commands.drive.GoToDegrees;
+// import frc.robot.subsystems.drive.DriveSubsystem;
+// import frc.robot.subsystems.RealNeoMotor;
+// import frc.robot.subsystems.SimNeoMotor;
 
 // ELEVATOR V1
 // import frc.robot.commands.elevator.GoToElevatorHeight;
 // import frc.robot.subsystems.elevator.ElevatorConstants;
 // import frc.robot.subsystems.elevator.ElevatorSubsystem;
 
-import frc.robot.subsystems.RealNeoMotor;
-import frc.robot.subsystems.SimNeoMotor;
 // ELEVATOR V2
-// import frc.robot.subsystems.elevatorV2.V2ElevatorConstants;
-// import frc.robot.subsystems.elevatorV2.V2ElevatorSubsystem;
-// import frc.robot.commands.elevatorV2.SetElevatorState;
-// import frc.robot.commands.elevatorV2.SetElevator12V;
-//import frc.robot.subsystems.elevatorV2.SimElevatorMotor;
-
+import frc.robot.subsystems.elevatorV2.V2ElevatorSubsystem;
+import frc.robot.subsystems.elevatorV2.V2ElevatorConstants;
+import frc.robot.commands.elevatorV2.SetElevatorState;
+import frc.robot.subsystems.elevatorV2.SimElevatorMotor;
 
 public class RobotContainer {
 
 	// DRIVE
-	private final DriveSubsystem m_DriveSubsystem;
-	private final GoToDegrees m_GoTo90Degrees;
-	private final GoToDegrees m_GoTo0Degrees;
+	// private final DriveSubsystem m_DriveSubsystem;
+	// private final GoToDegrees m_GoTo90Degrees;
+	// private final GoToDegrees m_GoTo0Degrees;
 
 	// ELEVATOR V1
 	// private final ElevatorSubsystem m_ElevatorSubsystem;
@@ -56,15 +54,11 @@ public class RobotContainer {
 	// private final DoubleSupplier rotSpeedSupplier;
 
 	// ELEVATOR V2
-	// private final V2ElevatorSubsystem m_ElevatorSubsystem2;
-	// private final SetElevatorState m_GoToElevatorHighest;
-	// private final SetElevatorState m_GoToElevatorLowest;
-	// private final SetElevatorState m_GoToElevatorMiddle;
-	// testing
-	// private final SetElevator12V m_SetElevator12V;
-
+	private final V2ElevatorSubsystem m_ElevatorSubsystem2;
+	private final SetElevatorState m_GoToElevatorHighest;
+	private final SetElevatorState m_GoToElevatorLowest;
+	private final SetElevatorState m_GoToElevatorMiddle;
 	
-
 	private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
 
 	private final CommandXboxController m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
@@ -73,24 +67,24 @@ public class RobotContainer {
 		
 		if (RobotBase.isSimulation()){
 			// DRIVE
-			m_DriveSubsystem = new DriveSubsystem(new SimNeoMotor());
+			// m_DriveSubsystem = new DriveSubsystem(new SimNeoMotor());
 
 			// ELEVATOR V1
 			// m_ElevatorSubsystem = new ElevatorSubsystem(new SimNeoMotor(), false);
 
 			// ELEVATOR V2
-			// m_ElevatorSubsystem2 = new V2ElevatorSubsystem(new SimElevatorMotor(), true);
+			m_ElevatorSubsystem2 = new V2ElevatorSubsystem(new SimElevatorMotor(), true);
 			
 			
 		} else {
 			// DRIVE
-			m_DriveSubsystem = new DriveSubsystem(new RealNeoMotor(OperatorConstants.driveMotorCanId));
+			// m_DriveSubsystem = new DriveSubsystem(new RealNeoMotor(OperatorConstants.driveMotorCanId));
 
 			// ELEVATOR V1
 			// m_ElevatorSubsystem = new ElevatorSubsystem(new RealNeoMotor(OperatorConstants.elevatorMotorCanId), true);
 
 			// ELEVATOR V2
-			// m_ElevatorSubsystem2 = new V2ElevatorSubsystem(new SimElevatorMotor(), false);
+			m_ElevatorSubsystem2 = new V2ElevatorSubsystem(new SimElevatorMotor(), false);
 		}
 
 		// ELEVATOR V1 ////////////////////
@@ -99,15 +93,13 @@ public class RobotContainer {
 		// m_GoToElevatorMiddle = new GoToElevatorHeight(m_ElevatorSubsystem, ElevatorConstants.ElevatorStates.MIDDLE);
 
 		// ELEVATOR V2 ////////////////////
-		// m_GoToElevatorLowest = new SetElevatorState(m_ElevatorSubsystem2, V2ElevatorConstants.ElevatorStates.LOWEST);
-		// m_GoToElevatorMiddle = new SetElevatorState(m_ElevatorSubsystem2, V2ElevatorConstants.ElevatorStates.MIDDLE);
-		// m_GoToElevatorHighest = new SetElevatorState(m_ElevatorSubsystem2, V2ElevatorConstants.ElevatorStates.HIGHEST);
-
-		// m_SetElevator12V = new SetElevator12V(m_ElevatorSubsystem2);
+		m_GoToElevatorLowest = new SetElevatorState(m_ElevatorSubsystem2, V2ElevatorConstants.ElevatorStates.LOWEST);
+		m_GoToElevatorMiddle = new SetElevatorState(m_ElevatorSubsystem2, V2ElevatorConstants.ElevatorStates.MIDDLE);
+		m_GoToElevatorHighest = new SetElevatorState(m_ElevatorSubsystem2, V2ElevatorConstants.ElevatorStates.HIGHEST);
 
 		// DRIVE ////////////////////
-		m_GoTo90Degrees = new GoToDegrees(m_DriveSubsystem, 90);
-		m_GoTo0Degrees = new GoToDegrees(m_DriveSubsystem, 0);
+		// m_GoTo90Degrees = new GoToDegrees(m_DriveSubsystem, 90);
+		// m_GoTo0Degrees = new GoToDegrees(m_DriveSubsystem, 0);
 
 		// SWERVE ////////////////////
 
@@ -125,9 +117,8 @@ public class RobotContainer {
 			ySpeedSupplier,
 			rotSpeedSupplier,
 		);	
-		/* 
+		*/
 		
-
 		// CONFIGURE BINDINGS ////////////////////
 		configureBindings();
 
@@ -157,14 +148,13 @@ public class RobotContainer {
 		// m_driverController.a().onTrue(m_GoToElevatorMiddle);
 
 		// ELEVATOR V2
-		// m_driverController.x().onTrue(m_GoToElevatorHighest);
-		// m_driverController.y().onTrue(m_GoToElevatorLowest);
-		// m_driverController.a().onTrue(m_GoToElevatorMiddle);
-		// m_driverController.b().onTrue(m_SetElevator12V);
+		m_driverController.x().onTrue(m_GoToElevatorHighest);
+		m_driverController.y().onTrue(m_GoToElevatorLowest);
+		m_driverController.a().onTrue(m_GoToElevatorMiddle);
 		 
 		// DRIVE
-		m_driverController.a().onTrue(m_GoTo0Degrees);
-		m_driverController.b().onTrue(m_GoTo90Degrees);
+		// m_driverController.a().onTrue(m_GoTo0Degrees);
+		// m_driverController.b().onTrue(m_GoTo90Degrees);
 		
 	}
 

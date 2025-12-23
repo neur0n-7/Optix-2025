@@ -1,10 +1,10 @@
 package frc.robot.subsystems.drive;
+import org.littletonrobotics.junction.Logger;
 
 public class DriveConstants {
 
     // PID
-
-    public static final double kP = 0.1;
+    public static final double kP = 0.3;
     public static final double kI = 0.0;
     public static final double kD = 0;
 

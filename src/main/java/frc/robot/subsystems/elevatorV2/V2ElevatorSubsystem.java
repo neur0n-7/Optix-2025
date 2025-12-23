@@ -97,31 +97,17 @@ public class V2ElevatorSubsystem extends SubsystemBase {
         lastActualVelocity = actualVelocity;
 
         double ffVolts = feedforward.calculate(setpointVelocity, setpointAcceleration);
-        // double ffVolts = 0.0;
 
-        double outputVolts = MathUtil.clamp(pidVolts + ffVolts, -12.0, 12.0);
-        setMotorVoltage(outputVolts);
+        double totalVolts = MathUtil.clamp(pidVolts + ffVolts, -12.0, 12.0);
+
+        setMotorVoltage(totalVolts);
 
         elevatorMech.setLength(currentPosition);
 
         SmartDashboard.putNumber("ElevatorV2/Position", currentPosition);
         SmartDashboard.putNumber("ElevatorV2/Target", targetMeters);
         SmartDashboard.putString("ElevatorV2/Target State", state.toString());
-        // SmartDashboard.putNumber("ElevatorV2/Error", targetMeters - currentPosition);
-
-        boolean isAtTarget = atTarget();
-
-        if (isAtTarget) {
-            SmartDashboard.putString("ElevatorV2/Action", "HOLD %s".formatted(state.toString()));
-        } else {
-            if (setpointAcceleration > 0) {
-                SmartDashboard.putString("ElevatorV2/Action", "ACCEL");
-            } else if (setpointAcceleration < 0) {
-                SmartDashboard.putString("ElevatorV2/Action", "DECEL");
-            } else {
-                SmartDashboard.putString("ElevatorV2/Action", "CRUISE");
-            }
-        }
+        SmartDashboard.putNumber("ElevatorV2/Error", targetMeters - currentPosition);
 
         SmartDashboard.putNumber("ElevatorV2/Velocity (Setpoint)", setpointVelocity);
         SmartDashboard.putNumber("ElevatorV2/Velocity (Actual)", actualVelocity);
@@ -131,8 +117,8 @@ public class V2ElevatorSubsystem extends SubsystemBase {
 
         SmartDashboard.putNumber("ElevatorV2/PID Volts", pidVolts);
         SmartDashboard.putNumber("ElevatorV2/FF Volts", ffVolts);
-        SmartDashboard.putNumber("ElevatorV2/Total Volts", outputVolts);
-        SmartDashboard.putBoolean("ElevatorV2/At Target", isAtTarget);
+        SmartDashboard.putNumber("ElevatorV2/Total Volts", totalVolts);
+        SmartDashboard.putBoolean("ElevatorV2/At Target", atTarget());
         SmartDashboard.putData("ElevatorV2/Mech2d", mech);
 
         /*

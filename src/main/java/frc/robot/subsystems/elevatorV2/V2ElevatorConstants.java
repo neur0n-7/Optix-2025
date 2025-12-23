@@ -7,7 +7,7 @@ public class V2ElevatorConstants {
     // PID
     public static final double kP = 12.0;
     public static final double kI = 0.0;
-    public static final double kD = 0.0;
+    public static final double kD = 1.0;
 
     // contraints
     public static final double maxVelocity = 0.66; // m/sec
@@ -16,7 +16,7 @@ public class V2ElevatorConstants {
     // FF
     public static final double kS = 0.0; // friction
     public static final double kG = 0.0; // gravity
-    public static final double kV = 12.0 / maxVelocity * 1.5; // velocity
+    public static final double kV = 12.0 / maxVelocity; // velocity
     public static final double kA = 12.0 / maxAccel; // accel
 
     // specsc
