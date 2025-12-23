@@ -8,13 +8,12 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.NeoMotor;
 import frc.robot.subsystems.elevatorV2.V2ElevatorConstants.ElevatorStates;
 
 public class V2ElevatorSubsystem extends SubsystemBase {
 
 
-    private final NeoMotor motor;
+    private final SimElevatorMotor motor;
 
     private final ProfiledPIDController pidController;
     private final ElevatorFeedforward feedforward;
@@ -32,7 +31,7 @@ public class V2ElevatorSubsystem extends SubsystemBase {
     private final LoggedMechanism2d mech = new LoggedMechanism2d(3, 3);
     private final LoggedMechanismLigament2d elevatorMech;
 
-    public V2ElevatorSubsystem(NeoMotor motor, boolean isSim) {
+    public V2ElevatorSubsystem(SimElevatorMotor motor, boolean isSim) {
         this.motor = motor;
 
         pidController = new ProfiledPIDController(
@@ -62,7 +61,7 @@ public class V2ElevatorSubsystem extends SubsystemBase {
         elevatorMech = root.append(
             new LoggedMechanismLigament2d(
                 "elevator",
-                V2ElevatorConstants.elevatorBaseHeight,
+                0.0,
                 90
             )
         );
@@ -113,7 +112,7 @@ public class V2ElevatorSubsystem extends SubsystemBase {
         double outputVolts = MathUtil.clamp(pidVolts + ffVolts, -12.0, 12.0);
         setMotorVoltage(outputVolts);
 
-        elevatorMech.setLength(V2ElevatorConstants.elevatorBaseHeight + currentPosition);
+        elevatorMech.setLength(currentPosition);
 
         SmartDashboard.putNumber("ElevatorV2/Position", currentPosition);
         SmartDashboard.putNumber("ElevatorV2/Target", targetMeters);

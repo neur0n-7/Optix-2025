@@ -31,6 +31,6 @@ public final class Constants {
     public static final int elevatorMotorCanId = 23;
 
     // DRIVE (single motor basically)
-    public static final int driveMotorCanId = 22;
+    public static final int driveMotorCanId = 3;
   }
 }

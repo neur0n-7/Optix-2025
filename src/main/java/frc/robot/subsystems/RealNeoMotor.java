@@ -23,7 +23,7 @@ public class RealNeoMotor implements NeoMotor {
 
     @Override
     public void setVoltage(double volts) {
-        motor.set(volts/12); // volts to motor percent output
+        motor.setVoltage(volts); // volts to motor percent output
     }
 
     @Override

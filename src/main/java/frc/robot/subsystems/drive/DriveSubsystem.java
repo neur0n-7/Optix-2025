@@ -19,7 +19,6 @@ public class DriveSubsystem extends SubsystemBase {
 	public DriveSubsystem(NeoMotor motor) {
 		pid.setTolerance(DriveConstants.PIDTolerance);
 		this.motor = motor;
-
 	}
 
 	public void setTargetDegrees(double degrees) {
