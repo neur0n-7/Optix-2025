@@ -1,7 +1,6 @@
 
 package frc.robot.commands.swerve;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,8 +16,7 @@ public class JoystickDrive extends Command {
             SwerveSubsystem swerve,
             DoubleSupplier xSpeedSupplier,
             DoubleSupplier ySpeedSupplier,
-            DoubleSupplier rotSpeedSupplier,
-            BooleanSupplier fieldRelativeSupplier
+            DoubleSupplier rotSpeedSupplier
     ) {
         this.swerve = swerve;
         this.xSpeedSupplier = xSpeedSupplier;

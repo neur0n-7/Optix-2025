@@ -38,25 +38,27 @@ public class V2ElevatorSubsystem extends SubsystemBase {
                 V2ElevatorConstants.kD,
                 new TrapezoidProfile.Constraints(
                         V2ElevatorConstants.maxVelocity,
-                        V2ElevatorConstants.maxAccel));
+                        V2ElevatorConstants.maxAccel
+                )
+        );
+
         pidController.setTolerance(0.01);
 
-        if (isSim) {
-            feedforward = new ElevatorFeedforward(0.0, 0.0, V2ElevatorConstants.kV, V2ElevatorConstants.kA);
-        } else {
-            feedforward = new ElevatorFeedforward(
-                    V2ElevatorConstants.kS,
-                    V2ElevatorConstants.kG,
-                    V2ElevatorConstants.kV,
-                    V2ElevatorConstants.kA);
-        }
+        feedforward = new ElevatorFeedforward(
+                V2ElevatorConstants.kS,
+                V2ElevatorConstants.kG,
+                V2ElevatorConstants.kV,
+                V2ElevatorConstants.kA
+        );
 
         LoggedMechanismRoot2d root = mech.getRoot("elevator", 1, 0);
         elevatorMech = root.append(
                 new LoggedMechanismLigament2d(
                         "elevator",
                         0.0,
-                        90));
+                        90
+                )
+        );
     }
 
     public void setTargetState(ElevatorStates targetState) {

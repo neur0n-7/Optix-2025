@@ -1,5 +1,7 @@
 package frc.robot.subsystems.swerve;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -59,8 +61,19 @@ public class SwerveSubsystem extends SubsystemBase{
         String[] moduleNames = {"FL", "FR", "BL", "BR"};
 
         for (int i=0; i<4; i++){
-            logSwerveModule("Swerve %s Module".formatted(moduleNames[i]), modules[i]);
+            logSwerveModule("Swerve/%s Module".formatted(moduleNames[i]), modules[i]);
+
         }
+
+        SwerveModuleState[] states = new SwerveModuleState[] {
+            modules[0].getState(),
+            modules[1].getState(),
+            modules[2].getState(),
+            modules[3].getState(),
+        };
+
+        Logger.recordOutput("Swerve/States", states);
+
     }
 
 }

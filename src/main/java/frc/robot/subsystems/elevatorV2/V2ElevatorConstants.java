@@ -5,9 +5,9 @@ import edu.wpi.first.math.util.Units;
 public class V2ElevatorConstants {
 
     // PID
-    public static final double kP = 12.0;
+    public static final double kP = 50.0;
     public static final double kI = 0.0;
-    public static final double kD = 1.0;
+    public static final double kD = 0.0;
 
     // contraints
     public static final double maxVelocity = 0.66; // m/sec
@@ -15,7 +15,7 @@ public class V2ElevatorConstants {
 
     // FF
     public static final double kS = 0.0; // friction
-    public static final double kG = 0.0; // gravity
+    public static final double kG = 0.67; // gravity
     public static final double kV = 12.0 / maxVelocity; // velocity
     public static final double kA = 12.0 / maxAccel; // accel
 
@@ -24,7 +24,7 @@ public class V2ElevatorConstants {
     public static final double gearing = 16 * (24.0 / 22.0);
     public static final double drumCircumference = Math.PI * drumDiameter;
     public static final double metersPerMotorRotation = drumCircumference / gearing;
-    public static final double carriageMassKg = Units.lbsToKilograms(54);
+    public static final double carriageMassKg = Units.lbsToKilograms(30);
 
     public enum ElevatorStates {
         LOWEST(0.0),

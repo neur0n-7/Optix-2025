@@ -12,7 +12,6 @@ import frc.robot.subsystems.ExampleSubsystem;
 
 // SWERVE
 // import frc.robot.commands.swerve.JoystickDrive;
-// import java.util.function.BooleanSupplier;
 // import java.util.function.DoubleSupplier;
 // import frc.robot.subsystems.swerve.SwerveSubsystem;
 
@@ -105,20 +104,22 @@ public class RobotContainer {
 
 		// Supplier lambdas
 		// left joystick handles movement, right joystick handles turning
-		// xSpeedSupplier = () -> -m_driverController.getLeftY();
-		// ySpeedSupplier = () -> m_driverController.getLeftX();
-		// rotSpeedSupplier = () -> m_driverController.getRightX();
-
 		/*
+		xSpeedSupplier = () -> -m_driverController.getLeftY();
+		ySpeedSupplier = () -> m_driverController.getLeftX();
+		rotSpeedSupplier = () -> m_driverController.getRightX();
+
+		
 		m_SwerveSubsystem = new SwerveSubsystem(RobotBase.isReal());
 		m_JoystickDrive = new JoystickDrive(
 			m_SwerveSubsystem,
 			xSpeedSupplier,
 			ySpeedSupplier,
-			rotSpeedSupplier,
+			rotSpeedSupplier
 		);	
-		*/
-		
+	 	*/
+
+	
 		// CONFIGURE BINDINGS ////////////////////
 		configureBindings();
 
