@@ -1,133 +1,49 @@
 package frc.robot.subsystems.swerve;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.OperatorConstants;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 
 public class SwerveSubsystem extends SubsystemBase{
 
-    private final SwerveModule frontLeft;
-    private final SwerveModule frontRight;
-    private final SwerveModule backLeft;
-    private final SwerveModule backRight;
+    private final SwerveModule[] modules = new SwerveModule[4];
 
-    private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
-        SwerveConstants.kFrontLeftLocation,
-        SwerveConstants.kFrontRightLocation,
-        SwerveConstants.kBackLeftLocation,
-        SwerveConstants.kBackRightLocation
-    );
-
-    private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(
-        kinematics,
-        new Rotation2d(0.0),
-        getModulePositions(),
-        new Pose2d()
-    );
+    private final SwerveDriveKinematics kinematics = SwerveConstants.DrivetrainConstants.driveKinematics;
 
     public SwerveSubsystem(boolean isReal) {
-
-        if (isReal){
-            frontLeft = new SwerveModuleReal(
-                OperatorConstants.kFrontLeftDriveMotorPort,
-                OperatorConstants.kFrontLeftTurningMotorPort,
-                SwerveConstants.kFrontLeftDriveEncoderReversed,
-                SwerveConstants.kFrontLeftTurningEncoderReversed,
-                SwerveConstants.kFrontLeftDriveAbsoluteEncoderPort,
-                SwerveConstants.kFrontLeftDriveAbsoluteEncoderOffsetRad,
-                SwerveConstants.kFrontLeftDriveAbsoluteEncoderReversed
-            );
-
-            frontRight = new SwerveModuleReal(
-                OperatorConstants.kFrontRightDriveMotorPort,
-                OperatorConstants.kFrontRightTurningMotorPort,
-                SwerveConstants.kFrontRightDriveEncoderReversed,
-                SwerveConstants.kFrontRightTurningEncoderReversed,
-                SwerveConstants.kFrontRightDriveAbsoluteEncoderPort,
-                SwerveConstants.kFrontRightDriveAbsoluteEncoderOffsetRad,
-                SwerveConstants.kFrontRightDriveAbsoluteEncoderReversed
-            );
-
-            backLeft = new SwerveModuleReal(
-                OperatorConstants.kBackLeftDriveMotorPort,
-                OperatorConstants.kBackLeftTurningMotorPort,
-                SwerveConstants.kBackLeftDriveEncoderReversed,
-                SwerveConstants.kBackLeftTurningEncoderReversed,
-                SwerveConstants.kBackLeftDriveAbsoluteEncoderPort,
-                SwerveConstants.kBackLeftDriveAbsoluteEncoderOffsetRad,
-                SwerveConstants.kBackLeftDriveAbsoluteEncoderReversed
-            );
-
-            backRight = new SwerveModuleReal(
-                OperatorConstants.kBackRightDriveMotorPort,
-                OperatorConstants.kBackRightTurningMotorPort,
-                SwerveConstants.kBackRightDriveEncoderReversed,
-                SwerveConstants.kBackRightTurningEncoderReversed,
-                SwerveConstants.kBackRightDriveAbsoluteEncoderPort,
-                SwerveConstants.kBackRightDriveAbsoluteEncoderOffsetRad,
-                SwerveConstants.kBackRightDriveAbsoluteEncoderReversed
-            );
-        } else {
-            frontLeft = new SwerveModuleSim();
-            frontRight = new SwerveModuleSim();
-            backLeft = new SwerveModuleSim();
-            backRight = new SwerveModuleSim();
+        for (int i = 0; i < 4; i++) {
+            if (isReal) {
+                modules[i] = new SwerveModuleReal(
+                        SwerveConstants.MotorConstants.driveMotorIds[i],
+                        SwerveConstants.MotorConstants.turnMotorIds[i],
+                        SwerveConstants.MotorConstants.driveMotorInverted[i],
+                        SwerveConstants.MotorConstants.turningMotorInverted[i],
+                        SwerveConstants.MotorConstants.absoluteEncoderIds[i],
+                        SwerveConstants.MotorConstants.absoluteEncoderOffsetRad[i],
+                        SwerveConstants.MotorConstants.driveAbsoluteEncoderInverted[i]
+                );
+            } else {
+                modules[i] = new SwerveModuleSim();
+            }
         }
     }
 
     // DRIVE /////////////////////////////////////////////////////////////////////////////////////////
 
-    public void drive(double xSpeed, double ySpeed, double rotSpeed, boolean fieldRelative) {
+    public void drive(double xSpeed, double ySpeed, double rotSpeed) {
 
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(
-            fieldRelative ?
-                edu.wpi.first.math.kinematics.ChassisSpeeds.fromFieldRelativeSpeeds(
-                    xSpeed, ySpeed, rotSpeed, getHeading())
-                :
-                new edu.wpi.first.math.kinematics.ChassisSpeeds(xSpeed, ySpeed, rotSpeed)
+            new edu.wpi.first.math.kinematics.ChassisSpeeds(xSpeed, ySpeed, rotSpeed)
         );
 
         // dont exceed max speed
-        SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.kPhysicalMaxSpeedMetersPerSecond);
+        SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.ControlConstants.teleopMaxSpeedMetersPerSecond);
 
-        frontLeft.setDesiredState(states[0]);
-        frontRight.setDesiredState(states[1]);
-        backLeft.setDesiredState(states[2]);
-        backRight.setDesiredState(states[3]);
-    }
-    
-    public SwerveDriveKinematics getKinematics() {
-        return kinematics;
-    }
-
-    public Rotation2d getHeading() {
-        return new Rotation2d(0); // TODO: replace with gyro reading
-    }
-
-    // Pose = position + orientation
-    public Pose2d getPose() {
-        return odometry.getPoseMeters();
-    }
-
-    // because odometry is dumb smh
-    private SwerveModulePosition[] getModulePositions() {
-        return new SwerveModulePosition[] {
-            new SwerveModulePosition(frontLeft.getDrivePosition(),  new Rotation2d(frontLeft.getTurningPosition())),
-            new SwerveModulePosition(frontRight.getDrivePosition(), new Rotation2d(frontRight.getTurningPosition())),
-            new SwerveModulePosition(backLeft.getDrivePosition(),   new Rotation2d(backLeft.getTurningPosition())),
-            new SwerveModulePosition(backRight.getDrivePosition(),  new Rotation2d(backRight.getTurningPosition()))
-        };
-    }
-
-    public void resetOdometry(Pose2d pose) {
-        odometry.resetPosition(getHeading(), getModulePositions(), pose);
+        for (int i = 0; i < 4; i++) {
+            modules[i].setDesiredState(states[i]);
+        }
     }
 
     private void logSwerveModule(String name, SwerveModule module) {
@@ -140,16 +56,11 @@ public class SwerveSubsystem extends SubsystemBase{
 
     @Override
     public void periodic(){
-        odometry.update(getHeading(), getModulePositions());
+        String[] moduleNames = {"FL", "FR", "BL", "BR"};
 
-        SmartDashboard.putNumber("Robot X", getPose().getX());
-        SmartDashboard.putNumber("Robot Y", getPose().getY());
-        SmartDashboard.putNumber("Robot Heading", getPose().getRotation().getDegrees());
-
-        logSwerveModule("Front Left", frontLeft);
-        logSwerveModule("Front Right", frontRight);
-        logSwerveModule("Back Left", backLeft);
-        logSwerveModule("Back Right", backRight);
+        for (int i=0; i<4; i++){
+            logSwerveModule("Swerve %s Module".formatted(moduleNames[i]), modules[i]);
+        }
     }
 
 }

@@ -15,11 +15,11 @@ public class StopModules extends Command {
 
     @Override
     public void execute() {
-        swerve.drive(0, 0, 0, false);
+        swerve.drive(0, 0, 0);
     }
 
     @Override
     public void end(boolean interrupted) {
-        swerve.drive(0, 0, 0, false);
+        swerve.drive(0, 0, 0);
     }
 }

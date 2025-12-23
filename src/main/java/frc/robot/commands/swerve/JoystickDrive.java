@@ -12,7 +12,6 @@ public class JoystickDrive extends Command {
     private final DoubleSupplier xSpeedSupplier;
     private final DoubleSupplier ySpeedSupplier;
     private final DoubleSupplier rotSpeedSupplier;
-    private final BooleanSupplier fieldRelativeSupplier;
 
     public JoystickDrive(
             SwerveSubsystem swerve,
@@ -25,7 +24,6 @@ public class JoystickDrive extends Command {
         this.xSpeedSupplier = xSpeedSupplier;
         this.ySpeedSupplier = ySpeedSupplier;
         this.rotSpeedSupplier = rotSpeedSupplier;
-        this.fieldRelativeSupplier = fieldRelativeSupplier;
 
         addRequirements(swerve);
     }
@@ -35,13 +33,12 @@ public class JoystickDrive extends Command {
         swerve.drive(
             xSpeedSupplier.getAsDouble(),
             ySpeedSupplier.getAsDouble(),
-            rotSpeedSupplier.getAsDouble(),
-            fieldRelativeSupplier.getAsBoolean()
+            rotSpeedSupplier.getAsDouble()
         );
     }
 
     @Override
     public void end(boolean interrupted) {
-        swerve.drive(0, 0, 0, false);
+        swerve.drive(0, 0, 0);
     }
 }

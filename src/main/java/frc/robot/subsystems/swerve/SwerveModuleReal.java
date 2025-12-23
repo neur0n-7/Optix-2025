@@ -43,7 +43,7 @@ public class SwerveModuleReal extends SubsystemBase implements SwerveModule {
             turningMotor.setInverted(turningMotorReversed);
 
             driveEncoder = driveMotor.getEncoder();
-            turningEncoder = driveMotor.getEncoder();
+            turningEncoder = turningMotor.getEncoder();
 
             turningPIDController = new PIDController(0.1, 0.0, 0.0);
             turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
@@ -53,12 +53,12 @@ public class SwerveModuleReal extends SubsystemBase implements SwerveModule {
 
     @Override
     public void setDriveVoltage(double volts) {
-        driveMotor.set(volts / 12.0); // convert volts to percent
+        driveMotor.setVoltage(volts); // convert volts to percent
     }
 
     @Override
     public void setTurnVoltage(double volts) {
-        turningMotor.set(volts / 12.0);
+        turningMotor.setVoltage(volts);
     }
 
     @Override
@@ -102,14 +102,14 @@ public class SwerveModuleReal extends SubsystemBase implements SwerveModule {
         }
 
         state = SwerveModuleState.optimize(state, getState().angle);
-        driveMotor.set(state.speedMetersPerSecond / SwerveConstants.kPhysicalMaxSpeedMetersPerSecond);
-        turningMotor.set(turningPIDController.calculate(getTurningPosition(), state.angle.getRadians()));
+        setDriveVoltage(state.speedMetersPerSecond / SwerveConstants.ControlConstants.teleopMaxSpeedMetersPerSecond * 12.0);
+        setTurnVoltage(turningPIDController.calculate(getTurningPosition(), state.angle.getRadians()) * 12.0);
         SmartDashboard.putString("Swerve[" + absoluteEncoder.getChannel() + "] state", state.toString());
     }
 
     @Override
     public void stop(){
-        driveMotor.set(0);
-        turningMotor.set(0);
+        setDriveVoltage(0);
+        setTurnVoltage(0);
     }
 }

@@ -54,9 +54,6 @@ public class RobotContainer {
 	// private final DoubleSupplier xSpeedSupplier;
 	// private final DoubleSupplier ySpeedSupplier;
 	// private final DoubleSupplier rotSpeedSupplier;
-	// private final BooleanSupplier fieldRelativeSupplier;
-	// private boolean fieldRelativeToggle;
-	// private boolean fieldRelativeLastState;
 
 	// ELEVATOR V2
 	// private final V2ElevatorSubsystem m_ElevatorSubsystem2;
@@ -120,26 +117,13 @@ public class RobotContainer {
 		// ySpeedSupplier = () -> m_driverController.getLeftX();
 		// rotSpeedSupplier = () -> m_driverController.getRightX();
 
-		// fieldRelativeToggle = false;
-
 		/*
-		fieldRelativeSupplier = () -> {
-			if (m_driverController.b().getAsBoolean() && !fieldRelativeLastState) {
-				fieldRelativeToggle = !fieldRelativeToggle;
-			}
-			fieldRelativeLastState = m_driverController.b().getAsBoolean();
-			return fieldRelativeToggle;
-		};
-
-		fieldRelativeLastState = false;
-
 		m_SwerveSubsystem = new SwerveSubsystem(RobotBase.isReal());
 		m_JoystickDrive = new JoystickDrive(
 			m_SwerveSubsystem,
 			xSpeedSupplier,
 			ySpeedSupplier,
 			rotSpeedSupplier,
-			fieldRelativeSupplier
 		);	
 		/* 
 		

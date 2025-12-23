@@ -20,7 +20,7 @@ public class SwerveModuleSim extends SubsystemBase implements SwerveModule {
 
     private final PIDController turningPIDController;
 
-    // Simulation constants
+    // sim constants
     private static final double DRIVE_kV = 3.0;     // m/s per volt (tune)
     private static final double DRIVE_kA = 0.6;     // m/s^2 per volt
     private static final double TURN_kV  = 4.0;     // rad/s per volt
@@ -77,7 +77,7 @@ public class SwerveModuleSim extends SubsystemBase implements SwerveModule {
         }
 
         state = SwerveModuleState.optimize(state, new Rotation2d(turnPos));
-        driveVolts = state.speedMetersPerSecond / SwerveConstants.kPhysicalMaxSpeedMetersPerSecond * 12.0;
+        driveVolts = state.speedMetersPerSecond / SwerveConstants.ControlConstants.teleopMaxSpeedMetersPerSecond * 12.0;
         double output = turningPIDController.calculate(turnPos, state.angle.getRadians());
         turnVolts = output * 12.0;
     }
