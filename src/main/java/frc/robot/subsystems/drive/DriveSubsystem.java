@@ -38,7 +38,7 @@ public class DriveSubsystem extends SubsystemBase {
 		// This method will be called once per scheduler run
 		double currentVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
 
-		double currentDegrees = motor.getPosition();
+		double currentDegrees = motor.getPositionMeters();
 
 		pid.setP(kPLogger.get());
 		double output = pid.calculate(currentDegrees, targetDegrees);

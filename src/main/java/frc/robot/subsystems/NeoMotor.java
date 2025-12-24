@@ -13,5 +13,5 @@ public interface NeoMotor {
 
     double getBusVoltage();
 
-    double getPosition();
+    double getPositionMeters();
 }

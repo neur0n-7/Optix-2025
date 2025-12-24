@@ -4,38 +4,28 @@ import edu.wpi.first.math.util.Units;
 
 public class ElevatorConstants {
 
-    // ELEVATOR CONTROL ////////////////////////////////////////////////////////
     // PID
-    public static double kP = 5;
-    public static double kI = 0;
-    public static double kD = 0;
+    public static final double kP = 50.0;
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
 
-    // FeedForward
-    // stolen from Team-3749-2025 for now :))
-    public static double kG = 0.32; // gravity FF
-    public static double kS = 0.16; // friction FF
-    public static double kV = 1.0; // voltage FF (maintain velocity)
-    public static double kA = 0.05; // acceleration? idk how this works :(
+    // contraints
+    public static final double maxVelocity = 0.66; // m/sec
+    public static final double maxAccel = 20.486; // m/sec^2
 
-    // Other stuff
+    // FF
+    public static final double kS = 0.0; // friction
+    public static final double kG = 0.67; // gravity
+    public static final double kV = 12.0 / maxVelocity; // velocity
+    public static final double kA = 12.0 / maxAccel; // accel
 
-    public static double maxVelocity = 10; // meters/s
-    public static double maxAccel = 20; // meters/s^2
-
-    // ELEVATOR SPECS ////////////////////////////////////////////////////////
-    // numbers also taken from optix 2025 code, can be changed to use actual specs
-
-    public static final double gearing = 16 * (24.0 / 22.0);
-    public static final double elevatorBaseHeight = Units.feetToMeters(3.25); // meters
-
-
+    // specsc
     public static final double drumDiameter = Units.inchesToMeters(1.5);
-    public static final double drumCircumference = Math.PI * drumDiameter;
+    public static final double gearing = 16 * (24.0 / 22.0);
+    public static final double carriageMassKg = Units.lbsToKilograms(30);
 
-    public static final double metersPerMotorRotation = drumCircumference / gearing;
-    // ELEVATOR STATES ////////////////////////////////////////////////////////
     public enum ElevatorStates {
-        LOWEST(Units.feetToMeters(0)),
+        LOWEST(0.0),
         MIDDLE(Units.feetToMeters(3)),
         HIGHEST(Units.feetToMeters(6));
 
@@ -45,5 +35,4 @@ public class ElevatorConstants {
             this.position = position;
         }
     }
-
 }

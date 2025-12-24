@@ -1,15 +1,15 @@
-package frc.robot.commands.elevatorV2;
+package frc.robot.commands.elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.elevatorV2.V2ElevatorSubsystem;
-import frc.robot.subsystems.elevatorV2.V2ElevatorConstants.ElevatorStates;
+import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorStates;
 
 public class SetElevatorState extends Command {
 
-    private final V2ElevatorSubsystem elevator;
+    private final ElevatorSubsystem elevator;
     private final ElevatorStates target;
 
-    public SetElevatorState(V2ElevatorSubsystem elevator, ElevatorStates state) {
+    public SetElevatorState(ElevatorSubsystem elevator, ElevatorStates state) {
         this.elevator = elevator;
         this.target = state;
         addRequirements(elevator);

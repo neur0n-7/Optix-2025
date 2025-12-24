@@ -7,7 +7,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 
 public class SimNeoMotor implements NeoMotor {
@@ -19,7 +18,7 @@ public class SimNeoMotor implements NeoMotor {
 
     private final FlywheelSim sim = new FlywheelSim(plant, motor);
 
-    private double positionRotations = 0.0;
+    private double positionDegrees = 0.0;
     private double voltage = 0.0;
 
     @Override
@@ -49,7 +48,7 @@ public class SimNeoMotor implements NeoMotor {
         // SmartDashboard.putNumber("ElevatorV2/RadsPerSec", radPerSec);
         // SmartDashboard.putNumber("ElevatorV2/DtSeconds", dtSeconds);
 
-        positionRotations += (radPerSec * dtSeconds) / (2.0 * Math.PI);
+        positionDegrees += (radPerSec * dtSeconds) / (2.0 * Math.PI);
 
         // battery sag
         RoboRioSim.setVInVoltage(
@@ -62,8 +61,7 @@ public class SimNeoMotor implements NeoMotor {
     }
 
     @Override
-    public double getPosition() {
-        SmartDashboard.putNumber("ElevatorV2/MotorRotations", positionRotations);
-        return positionRotations;
+    public double getPositionMeters() {
+        return positionDegrees;
     }
 }

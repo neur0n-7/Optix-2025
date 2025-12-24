@@ -32,7 +32,7 @@ public class RealNeoMotor implements NeoMotor {
     }
 
     @Override
-    public double getPosition() {
+    public double getPositionMeters() {
         return motor.getEncoder().getPosition();
     }
 }

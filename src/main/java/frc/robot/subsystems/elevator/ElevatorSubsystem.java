@@ -1,148 +1,140 @@
 package frc.robot.subsystems.elevator;
-// import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
-import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
-import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
+
+import org.littletonrobotics.junction.mechanism.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
-// import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.NeoMotor;
 import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorStates;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
-    private final NeoMotor motor;
+    private final SimElevatorMotor motor;
+
+    private final ProfiledPIDController pidController;
+    private final ElevatorFeedforward feedforward;
+
+    private double lastSetpointVelocity = 0.0;
+
+    private double lastActualHeight = 0.0;
+    private double lastActualVelocity = 0.0;
+
+    private double targetMeters = 0.0;
 
     private ElevatorStates state = ElevatorStates.LOWEST;
-    private double setpoint = 0.0; // in meters
 
-    private double lastHeight = 0.0; // in order to calculate velociyt
-    private double lastVelocity = 0.0; // in order to calculate acceleration
+    private final LoggedMechanism2d mech = new LoggedMechanism2d(3, 3);
+    private final LoggedMechanismLigament2d elevatorMech;
 
-
-    private boolean useFeedforward;
-
-    private LoggedMechanism2d mech = new LoggedMechanism2d(3, 3);
-    private LoggedMechanismRoot2d root =  mech.getRoot("elevator", 1, 0);
-    private LoggedMechanismLigament2d elevatorMech = root.append(
-        new LoggedMechanismLigament2d("elevator", ElevatorConstants.elevatorBaseHeight, 90)
-    );
-
-    private ProfiledPIDController profiled = new ProfiledPIDController(
-            ElevatorConstants.kP, ElevatorConstants.kI, ElevatorConstants.kD,
-            new TrapezoidProfile.Constraints(
-                ElevatorConstants.maxVelocity,
-                ElevatorConstants.maxAccel
-            )
-    );
-
-    private ElevatorFeedforward feedforward;
-
-    public ElevatorSubsystem(NeoMotor motor, boolean isSim) {
-        profiled.setTolerance(0.01);
-
+    public ElevatorSubsystem(SimElevatorMotor motor, boolean isSim) {
         this.motor = motor;
 
-        if (isSim){
-            this.feedforward = new ElevatorFeedforward(
-                // gravity + friction aren't there in sim
-                0,
-                0,
-                ElevatorConstants.kV,
-                ElevatorConstants.kA
-            );
-        } else {
-            this.feedforward = new ElevatorFeedforward(
+        pidController = new ProfiledPIDController(
+                ElevatorConstants.kP,
+                ElevatorConstants.kI,
+                ElevatorConstants.kD,
+                new TrapezoidProfile.Constraints(
+                        ElevatorConstants.maxVelocity,
+                        ElevatorConstants.maxAccel
+                )
+        );
+
+        pidController.setTolerance(0.01);
+
+        feedforward = new ElevatorFeedforward(
                 ElevatorConstants.kS,
                 ElevatorConstants.kG,
                 ElevatorConstants.kV,
                 ElevatorConstants.kA
-            );
-        }
+        );
 
+        LoggedMechanismRoot2d root = mech.getRoot("elevator", 1, 0);
+        elevatorMech = root.append(
+                new LoggedMechanismLigament2d(
+                        "elevator",
+                        0.0,
+                        90
+                )
+        );
     }
 
-    public void setTarget(double meters){
-        setpoint = meters;
-        profiled.setGoal(meters);
+    public void setTargetState(ElevatorStates targetState) {
+        pidController.setGoal(targetState.position);
+        targetMeters = targetState.position;
+        state = targetState;
     }
 
-    private double getHeight(){
-        double motorRots = motor.getPosition();
-        return motorRots * ElevatorConstants.metersPerMotorRotation;
+    public boolean atTarget() {
+        return pidController.atGoal();
     }
 
+    // meters
+    public double getHeight() {
+        return motor.getPositionMeters();
+    }
 
-    public boolean atSetpoint(){ return profiled.atGoal(); }
-
-    private void updateElevatorDist(){
-        double dist = getHeight();
-        elevatorMech.setLength(ElevatorConstants.elevatorBaseHeight + dist);
+    public void setMotorVoltage(double volts) {
+        motor.setVoltage(volts);
     }
 
     @Override
     public void periodic() {
+        double currentPosition = getHeight();
 
-        double currentHeight = getHeight();
+        double pidVolts = pidController.calculate(currentPosition);
 
-        State setpointState = profiled.getSetpoint();
+        TrapezoidProfile.State setpoint = pidController.getSetpoint();
 
-        double currentVelocity = setpointState.velocity;
-        double currentAccel = (currentVelocity - lastVelocity) / 0.02;
-        lastVelocity = currentVelocity;
+        double setpointVelocity = setpoint.velocity;
+        double setpointAcceleration = (setpointVelocity - lastSetpointVelocity) / 0.02;
+        lastSetpointVelocity = setpointVelocity;
 
-        double ffVolts = feedforward.calculate(
-            currentVelocity,
-            currentAccel
-        );
-        double pidOutput = profiled.calculate(currentHeight);
+        double actualVelocity = (currentPosition - lastActualHeight) / 0.02;
+        double actualAccel = (actualVelocity - lastActualVelocity) / 0.02;
 
-        double totalVolts = MathUtil.clamp(ffVolts + pidOutput, -12, 12);
-    
+        lastActualHeight = currentPosition;
+        lastActualVelocity = actualVelocity;
 
-        motor.setVoltage(totalVolts);
+        double ffVolts = feedforward.calculate(setpointVelocity, setpointAcceleration);
 
-        // Logging
-        SmartDashboard.putNumber("Elevator/Setpoint", setpoint);
-        SmartDashboard.putNumber("Elevator/CurrentHeight", currentHeight);
-        SmartDashboard.putNumber("Elevator/Velocity", currentVelocity);
-        SmartDashboard.putNumber("Elevator/Acceleration", currentAccel);
-        
+        double totalVolts = MathUtil.clamp(pidVolts + ffVolts, -12.0, 12.0);
 
-        SmartDashboard.putNumber("Elevator/PID Output (V)", pidOutput);
-        SmartDashboard.putNumber("Elevator/FF Output (V)", ffVolts);
-        SmartDashboard.putNumber("Elevator/Total Voltage", totalVolts);
+        setMotorVoltage(totalVolts);
 
-        SmartDashboard.putString("Elevator/State", state.toString());
-        SmartDashboard.putBoolean("Elevator/AtSetpoint", profiled.atGoal());
+        elevatorMech.setLength(currentPosition);
 
-        // printing (for testing)
+        SmartDashboard.putNumber("ElevatorV2/Position", currentPosition);
+        SmartDashboard.putNumber("ElevatorV2/Target", targetMeters);
+        SmartDashboard.putString("ElevatorV2/Target State", state.toString());
+        SmartDashboard.putNumber("ElevatorV2/Error", targetMeters - currentPosition);
 
-        System.out.println("Periodic call ---");
-        System.out.println(
-            "SETPOINT %f, CURRENT %f, PID OUT %f, FF OUT %f, TOTAL OUT %f".formatted(
-                setpoint, currentHeight, pidOutput, ffVolts, totalVolts
-            )
-        );
-        System.out.println(
-            "AT SETPOINT %b, VELOCITY %f, ACCEL %f".formatted(
-                profiled.atGoal(), currentVelocity, currentAccel
-            )
-        );
+        SmartDashboard.putNumber("ElevatorV2/Velocity (Setpoint)", setpointVelocity);
+        SmartDashboard.putNumber("ElevatorV2/Velocity (Actual)", actualVelocity);
 
+        SmartDashboard.putNumber("ElevatorV2/Acceleration (Setpoint)", setpointAcceleration);
+        SmartDashboard.putNumber("ElevatorV2/Acceleration (Actual)", actualAccel);
 
+        SmartDashboard.putNumber("ElevatorV2/PID Volts", pidVolts);
+        SmartDashboard.putNumber("ElevatorV2/FF Volts", ffVolts);
+        SmartDashboard.putNumber("ElevatorV2/Total Volts", totalVolts);
+        SmartDashboard.putBoolean("ElevatorV2/At Target", atTarget());
+        SmartDashboard.putData("ElevatorV2/Mech2d", mech);
+
+        /*
+         * System.out.println("PERIODIC CALLED");
+         * System.out.println(
+         * "POS %f, SETPT %f, VELOCITY %f, ACCEL %f, PID V %f, FF V %f".formatted(
+         * position, setpointMeters, currentVelocity, acceleration, pidVolts, ffVolts)
+         * );
+         */
 
     }
 
     @Override
     public void simulationPeriodic() {
         motor.updateSimulation(0.02);
-        updateElevatorDist();
     }
 }

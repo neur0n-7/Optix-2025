@@ -34,9 +34,10 @@ public class Robot extends LoggedRobot {
 		// and put our
 		// autonomous chooser on the dashboard.
 		m_robotContainer = new RobotContainer();
-		Logger.start();
 		Logger.addDataReceiver(new WPILOGWriter());
 		Logger.addDataReceiver(new NT4Publisher());
+		Logger.start();
+
 	}
 
 	/**

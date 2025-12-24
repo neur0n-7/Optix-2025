@@ -1,4 +1,4 @@
-package frc.robot.subsystems.elevatorV2;
+package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -14,11 +14,11 @@ public class SimElevatorMotor implements NeoMotor {
     public SimElevatorMotor() {
         sim = new ElevatorSim(
                 DCMotor.getNEO(1),
-                V2ElevatorConstants.gearing,
-                V2ElevatorConstants.carriageMassKg,
-                V2ElevatorConstants.drumDiameter / 2.0,
+                ElevatorConstants.gearing,
+                ElevatorConstants.carriageMassKg,
+                ElevatorConstants.drumDiameter / 2.0,
                 0.0,
-                V2ElevatorConstants.ElevatorStates.HIGHEST.position,
+                ElevatorConstants.ElevatorStates.HIGHEST.position,
                 true,
                 0.0);
     }
@@ -45,8 +45,8 @@ public class SimElevatorMotor implements NeoMotor {
     }
 
     @Override
-    public double getPosition() {
-        return sim.getPositionMeters() / V2ElevatorConstants.metersPerMotorRotation;
+    public double getPositionMeters() {
+        return sim.getPositionMeters();
     }
 
     @Override
