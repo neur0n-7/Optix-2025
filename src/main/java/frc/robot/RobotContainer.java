@@ -20,11 +20,11 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.commands.drive.GoToDegrees;
 import frc.robot.commands.elevator.SetElevatorState;
 import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.drive.RealNeoMotor;
+import frc.robot.subsystems.drive.SimNeoMotor;
 import frc.robot.subsystems.elevator.SimElevatorMotor;
 import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.RealNeoMotor;
-import frc.robot.subsystems.SimNeoMotor;
 
 public class RobotContainer {
 
@@ -80,12 +80,8 @@ public class RobotContainer {
 
 		// ELEVATOR
 		if (subsystemEnabled.getOrDefault("ELEVATOR", false)) {
-			if (RobotBase.isSimulation()) {
-				m_ElevatorSubsystem = new ElevatorSubsystem(new SimElevatorMotor(), true);
-			} else {
-				m_ElevatorSubsystem = new ElevatorSubsystem(new SimElevatorMotor(), false);
-			}
-
+			m_ElevatorSubsystem = new ElevatorSubsystem(new SimElevatorMotor(), false);
+	
 			m_GoToElevatorLowest = new SetElevatorState(m_ElevatorSubsystem, ElevatorConstants.ElevatorStates.LOWEST);
 			m_GoToElevatorMiddle = new SetElevatorState(m_ElevatorSubsystem, ElevatorConstants.ElevatorStates.MIDDLE);
 			m_GoToElevatorHighest = new SetElevatorState(m_ElevatorSubsystem, ElevatorConstants.ElevatorStates.HIGHEST);

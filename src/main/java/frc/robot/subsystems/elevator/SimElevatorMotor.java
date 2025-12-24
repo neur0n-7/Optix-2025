@@ -2,8 +2,8 @@ package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.math.system.plant.DCMotor;
-import frc.robot.subsystems.NeoMotor;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import frc.robot.subsystems.drive.NeoMotor;
 import edu.wpi.first.math.MathUtil;
 
 public class SimElevatorMotor implements NeoMotor {
