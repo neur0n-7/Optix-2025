@@ -9,4 +9,12 @@ public interface ArmMotorIO {
     double getPositionDegrees();
 
     default void updateSimulation(double dtSeconds) { }
+
+    /*
+     * this is only needed for sim, to represent the arm getting 
+     * slightly heavier after picking up the cone
+    */
+    default void setArmMass(boolean hasCone) { }
+
+    
 }

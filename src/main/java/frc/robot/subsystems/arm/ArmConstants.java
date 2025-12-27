@@ -12,7 +12,7 @@ public class ArmConstants {
     public static final double maxLoadedAccel = 163.317;
 
     // PID
-    public static final double kP = 2;
+    public static final double kP = 0;
     public static final double kI = 0;
     public static final double kD = 0;
     public static final double PIDTolerance = 1.0;
@@ -20,11 +20,11 @@ public class ArmConstants {
     // FeedForward
     public static final double kS = 0.0;
 
-    public static final double kGEmpty = 0.0;
+    public static final double kGEmpty = 0.82;
     public static final double kVEmpty = 12.0 / maxEmptyVelocity;
     public static final double kAEmpty = 12.0 / maxEmptyAccel;
 
-    public static final double kGLoaded = 0.0;
+    public static final double kGLoaded = 1.02;
     public static final double kVLoaded = 12.0 / maxLoadedVelocity;
     public static final double kALoaded = 12.0 / maxLoadedAccel;
 
@@ -66,15 +66,13 @@ public class ArmConstants {
     }
 
     public enum CargoStates {
-        EMPTY(false, totalEmptyArmMassKg),
-        LOADED(true, totalLoadedArmMassKg);
+        EMPTY(false),
+        LOADED(true);
 
         public final boolean isHoldingCone;
-        public final double armMass;
 
-        CargoStates(boolean isHoldingCone, double armMass){
+        CargoStates(boolean isHoldingCone){
             this.isHoldingCone = isHoldingCone;
-            this.armMass = armMass;
         }
     }
 }

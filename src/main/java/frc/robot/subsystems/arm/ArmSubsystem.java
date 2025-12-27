@@ -34,8 +34,12 @@ public class ArmSubsystem extends SubsystemBase {
     private ArmPositionStates currentPositionState = ArmPositionStates.STOW;
 
     // mech
-    private final LoggedMechanism2d mech = new LoggedMechanism2d(3, 3);
+    private final LoggedMechanism2d mech = new LoggedMechanism2d(4, 4);
     private final LoggedMechanismLigament2d armMech;
+    private final LoggedMechanismLigament2d gripperLeft;
+    private final LoggedMechanismLigament2d gripperRight;
+    
+
 
     public ArmSubsystem(ArmMotorIO motor, GripperIO gripper) {
         this.armMotor = motor;
@@ -67,14 +71,32 @@ public class ArmSubsystem extends SubsystemBase {
             ArmConstants.kALoaded
         );
 
-        LoggedMechanismRoot2d root = mech.getRoot("arm", 1, 0);
+        LoggedMechanismRoot2d root = mech.getRoot("arm", 2, 2);
         armMech = root.append(
                 new LoggedMechanismLigament2d(
                         "arm",
-                        0.0,
-                        90
+                        1.5,
+                        0
                 )
         );
+
+        gripperLeft = armMech.append(
+            new LoggedMechanismLigament2d(
+                "gripperLeft",
+                0.3,
+                0
+            )
+        );
+
+        gripperRight = armMech.append(
+            new LoggedMechanismLigament2d(
+                "gripperRight",
+                0.3,
+                0
+            )
+        );
+
+        
     }
 
     // state setters
@@ -90,6 +112,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     public void setCargoState(CargoStates targetCargoState){
         gripper.setCargoState(targetCargoState);
+        armMotor.setArmMass(targetCargoState.isHoldingCone);
     }
 
     // getters
@@ -123,8 +146,11 @@ public class ArmSubsystem extends SubsystemBase {
         double armAngleDegrees = getPositionDegrees();
 
         // 0 degrees in the mech points right, it should point down
-        armMech.setAngle(armAngleDegrees + 90);
+        armMech.setAngle(armAngleDegrees - 90);
 
+        double clawAngle = gripper.getGripperState() == GripperStates.OPEN ? 60.0 : 10.0;
+        gripperLeft.setAngle(-clawAngle);
+        gripperRight.setAngle(clawAngle);
 
     }
 
@@ -155,7 +181,6 @@ public class ArmSubsystem extends SubsystemBase {
         double totalVolts = MathUtil.clamp(pidVolts + ffVolts, -12, 12);
         
         setMotorVoltage(totalVolts);
-
 
         SmartDashboard.putNumber("Arm/Current Degrees", currentDegrees);
         SmartDashboard.putNumber("Arm/Target Degrees", targetPositionDegrees);

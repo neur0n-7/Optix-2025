@@ -1,6 +1,5 @@
 package frc.robot.subsystems.arm.motor;
 
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.subsystems.arm.ArmConstants;
 import edu.wpi.first.math.util.Units;
@@ -9,12 +8,12 @@ import edu.wpi.first.math.system.plant.DCMotor;
 
 public class SimArmMotor implements ArmMotorIO {
 
-    private final SingleJointedArmSim sim;
+    private SingleJointedArmSim sim;
     private double voltage = 0.0;
 
     public SimArmMotor() {
 
-        double momentOfInertia = ArmConstants.totalEmptyArmMassKg * Math.pow(ArmConstants.shoulderLength, 2);
+        double momentOfInertia = ArmConstants.totalLoadedArmMassKg * Math.pow(ArmConstants.shoulderLength, 2);
 
         sim = new SingleJointedArmSim(
                 DCMotor.getNEO(1),
@@ -45,8 +44,29 @@ public class SimArmMotor implements ArmMotorIO {
     }
 
     public void updateSimulation(double dtSeconds) {
-        System.out.println("sim update called");
-        RoboRioSim.setVInVoltage(12.0);
         sim.update(dtSeconds);
     }
+
+    public void setArmMass(boolean hasCone) {
+        double armMass = hasCone ? ArmConstants.totalLoadedArmMassKg : ArmConstants.totalEmptyArmMassKg;
+        double momentOfInertia = armMass * Math.pow(ArmConstants.shoulderLength, 2);
+    
+        double currentAngle = sim.getAngleRads();
+        double currentVelocity = sim.getVelocityRadPerSec();
+    
+        // recreate sim with new mass
+        sim = new SingleJointedArmSim(
+            DCMotor.getNEO(1),
+            ArmConstants.gearing,
+            momentOfInertia,
+            ArmConstants.shoulderLength,
+            Units.degreesToRadians(0),
+            Units.degreesToRadians(180),
+            true,
+            currentAngle
+        );
+    
+        sim.setState(currentAngle, currentVelocity);
+    }
+    
 }
