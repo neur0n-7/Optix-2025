@@ -8,6 +8,5 @@ public interface ArmMotorIO {
 
     double getPositionDegrees();
 
-    default void updateSimulation(double dtSeconds) { };    
-
+    default void updateSimulation(double dtSeconds) { }
 }

@@ -6,11 +6,19 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
+import frc.robot.commands.arm.IntakeCone;
+import frc.robot.commands.arm.ScoreCone;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.arm.ArmSubsystem;
+import frc.robot.subsystems.arm.ArmConstants.ArmPositionStates;
+import frc.robot.subsystems.arm.gripper.RealGripper;
+import frc.robot.subsystems.arm.gripper.SimGripper;
+import frc.robot.subsystems.arm.motor.RealArmMotor;
+import frc.robot.subsystems.arm.motor.SimArmMotor;
 import frc.robot.commands.swerve.JoystickDrive;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,6 +57,13 @@ public class RobotContainer {
 	private final SetElevatorState m_SetElevatorLowest;
 	private final SetElevatorState m_SetElevatorMiddle;
 
+	// ARM
+	private final ArmSubsystem m_ArmSubsystem;
+	private final IntakeCone m_IntakeCone;
+	private final ScoreCone m_ScoreConeHigh;
+	private final ScoreCone m_ScoreConeLow;
+	
+
 	private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
 
 	private final CommandXboxController m_driverController = new CommandXboxController(
@@ -56,15 +71,17 @@ public class RobotContainer {
 
 	public RobotContainer() {
 
-		// ENABLE SUBSYTEMS
-		// //////////////////////////////////////////////////////////////////////
+		// ENABLE SUBSYTEMS //////////////////////////////////////////////////////////////////////
 		subsystemEnabled.put("SWERVE", false);
-		subsystemEnabled.put("ELEVATOR", true);
-		subsystemEnabled.put("DRIVE", true);
-		/////////////////////////////////////////////////////////////////////////////////////////
+		subsystemEnabled.put("ELEVATOR", false);
+		subsystemEnabled.put("DRIVE", false);
+		subsystemEnabled.put("ARM", true);
+		///////////////////////////////////////////////////////////////////////////////////////////
 
 		// DRIVE
 		if (subsystemEnabled.getOrDefault("DRIVE", false)) {
+
+
 			if (RobotBase.isSimulation()) {
 				m_DriveSubsystem = new DriveSubsystem(new SimNeoMotor());
 			} else {
@@ -73,6 +90,8 @@ public class RobotContainer {
 
 			m_GoTo90Degrees = new GoToDegrees(m_DriveSubsystem, 90);
 			m_GoTo0Degrees = new GoToDegrees(m_DriveSubsystem, 0);
+
+
 		} else {
 			m_DriveSubsystem = null;
 			m_GoTo90Degrees = null;
@@ -81,6 +100,8 @@ public class RobotContainer {
 
 		// ELEVATOR
 		if (subsystemEnabled.getOrDefault("ELEVATOR", false)) {
+
+
 			if (RobotBase.isSimulation()){
 				m_ElevatorSubsystem = new ElevatorSubsystem(new SimElevatorMotor());
 			} else {
@@ -90,6 +111,8 @@ public class RobotContainer {
 			m_SetElevatorLowest = new SetElevatorState(m_ElevatorSubsystem, ElevatorConstants.ElevatorStates.LOWEST);
 			m_SetElevatorMiddle = new SetElevatorState(m_ElevatorSubsystem, ElevatorConstants.ElevatorStates.MIDDLE);
 			m_SetElevatorHighest = new SetElevatorState(m_ElevatorSubsystem, ElevatorConstants.ElevatorStates.HIGHEST);
+		
+
 		} else {
 			m_ElevatorSubsystem = null;
 			m_SetElevatorLowest = null;
@@ -99,6 +122,8 @@ public class RobotContainer {
 
 		// SWERVE
 		if (subsystemEnabled.getOrDefault("SWERVE", false)) {
+
+
 			m_SwerveSubsystem = new SwerveSubsystem(RobotBase.isReal());
 
 			xSpeedSupplier = () -> -MathUtil.applyDeadband(
@@ -114,6 +139,8 @@ public class RobotContainer {
 					* SwerveConstants.ControlConstants.teleopMaxAngularSpeedRadPerSecond;
 
 			m_JoystickDrive = new JoystickDrive(m_SwerveSubsystem, xSpeedSupplier, ySpeedSupplier, rotSpeedSupplier);
+
+
 		} else {
 			m_SwerveSubsystem = null;
 			m_JoystickDrive = null;
@@ -122,12 +149,35 @@ public class RobotContainer {
 			rotSpeedSupplier = null;
 		}
 
+		// ARM
+		if (subsystemEnabled.getOrDefault("ARM", false)){
+
+
+			if (RobotBase.isSimulation()){
+				m_ArmSubsystem = new ArmSubsystem(new SimArmMotor(), new SimGripper());
+			} else {
+				m_ArmSubsystem = new ArmSubsystem(
+					new RealArmMotor(Constants.OperatorConstants.armMotorCanId), 
+					new RealGripper(Constants.OperatorConstants.gripperModuleType, Constants.OperatorConstants.gripperChannel));
+			}
+
+			m_IntakeCone = new IntakeCone(m_ArmSubsystem);
+			m_ScoreConeHigh = new ScoreCone(m_ArmSubsystem, ArmPositionStates.SCORE_HIGH);
+			m_ScoreConeLow = new ScoreCone(m_ArmSubsystem, ArmPositionStates.SCORE_LOW);
+			
+		} else {
+			m_ArmSubsystem = null;
+			m_IntakeCone = null;
+			m_ScoreConeHigh = null;
+			m_ScoreConeLow = null;
+		}
+
 		configureBindings();
 	}
 
 	private void configureBindings() {
 		/*
-		 * The bindings are as follows:
+		 * Bindings
 		 * 
 		 * SWERVE
 		 * - Left joystick to move robot w/ swerve
@@ -141,28 +191,36 @@ public class RobotContainer {
 		 * DRIVE (single motor):
 		 * - Press X to go to 0 degrees
 		 * - Press Y to go to 90 degrees
+		 * 
+		 * ARM
+		 * - A to intake cone
+		 * - X to score cone (low)
+		 * - Y to score cone (high)
 		 */
 
+		// SWERVE
 		if (subsystemEnabled.getOrDefault("SWERVE", false)) {
-			// SWERVE
-			System.out.println("SWERVE - Subsystem enabled");
 			m_SwerveSubsystem.setDefaultCommand(m_JoystickDrive);
 		}
 		;
 
+		// ELEVATOR
 		if (subsystemEnabled.getOrDefault("ELEVATOR", false)) {
-			// ELEVATOR
-			System.out.println("ELEVATOR - Subsystem enabled");
 			m_driverController.x().onTrue(m_SetElevatorHighest);
 			m_driverController.y().onTrue(m_SetElevatorLowest);
 			m_driverController.a().onTrue(m_SetElevatorMiddle);
 		}
 
+		// DRIVE
 		if (subsystemEnabled.getOrDefault("DRIVE", false)) {
-			// DRIVE
-			System.out.println("DRIVE - Subsystem enabled");
 			m_driverController.x().onTrue(m_GoTo0Degrees);
 			m_driverController.y().onTrue(m_GoTo90Degrees);
+		}
+
+		if (subsystemEnabled.getOrDefault("ARM", false)) {
+			m_driverController.a().onTrue(m_IntakeCone);
+			m_driverController.x().onTrue(m_ScoreConeLow);
+			m_driverController.y().onTrue(m_ScoreConeHigh);
 		}
 	}
 

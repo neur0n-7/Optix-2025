@@ -29,7 +29,7 @@ public class ArmSubsystem extends SubsystemBase {
     private double lastSetpointVelocity = 0.0;
     private double lastActualVelocity = 0.0;
     private double targetPositionDegrees = 0.0;
-
+    
     // states
     private ArmPositionStates currentPositionState = ArmPositionStates.STOW;
 
@@ -130,9 +130,8 @@ public class ArmSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-
+                
         double currentDegrees = getPositionDegrees();
-
 
         TrapezoidProfile.State setpoint = pidController.getSetpoint();
 
@@ -148,7 +147,6 @@ public class ArmSubsystem extends SubsystemBase {
 
         double ffVolts;
         if (gripper.getCargoState().isHoldingCone){
-            
             ffVolts = loadedFeedforward.calculate(Units.radiansToDegrees(getPositionDegrees()), setpointVelocity, setpointAcceleration);
         } else {
             ffVolts = emptyFeedforward.calculate(Units.radiansToDegrees(getPositionDegrees()), setpointVelocity, setpointAcceleration);
@@ -157,6 +155,7 @@ public class ArmSubsystem extends SubsystemBase {
         double totalVolts = MathUtil.clamp(pidVolts + ffVolts, -12, 12);
         
         setMotorVoltage(totalVolts);
+
 
         SmartDashboard.putNumber("Arm/Current Degrees", currentDegrees);
         SmartDashboard.putNumber("Arm/Target Degrees", targetPositionDegrees);

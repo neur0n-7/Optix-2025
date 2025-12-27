@@ -1,5 +1,6 @@
 package frc.robot.subsystems.arm.motor;
 
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.subsystems.arm.ArmConstants;
 import edu.wpi.first.math.util.Units;
@@ -30,7 +31,7 @@ public class SimArmMotor implements ArmMotorIO {
     @Override
     public void setVoltage(double volts) {
         voltage = MathUtil.clamp(volts, -12.0, 12.0);
-        sim.setInput(voltage);
+        sim.setInputVoltage(voltage);
     }
 
     @Override
@@ -44,6 +45,8 @@ public class SimArmMotor implements ArmMotorIO {
     }
 
     public void updateSimulation(double dtSeconds) {
+        System.out.println("sim update called");
+        RoboRioSim.setVInVoltage(12.0);
         sim.update(dtSeconds);
     }
 }

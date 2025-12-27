@@ -5,11 +5,11 @@ import edu.wpi.first.math.util.Units;
 public class ArmConstants {
 
     // Constraints
-    public static final double maxEmptyVelocity = 0.0;
-    public static final double maxEmptyAccel = 0.0;
+    public static final double maxEmptyVelocity = 5.386;
+    public static final double maxEmptyAccel = 183.140;
     
-    public static final double maxLoadedVelocity = 0.0;
-    public static final double maxLoadedAccel = 0.0;
+    public static final double maxLoadedVelocity = 5.467;
+    public static final double maxLoadedAccel = 163.317;
 
     // PID
     public static final double kP = 2;
@@ -29,7 +29,7 @@ public class ArmConstants {
     public static final double kALoaded = 12.0 / maxLoadedAccel;
 
     // Specs
-    public static final double gearing = 5.0;
+    public static final double gearing = 120.0;
 
     public static final double shoulderLength = Units.inchesToMeters(21.0);
 
@@ -44,7 +44,7 @@ public class ArmConstants {
     public enum ArmPositionStates {
         STOW(0.0),
         INTAKE(30.0),
-        SCORE_LOW(60.0),
+        SCORE_LOW(80.0),
         SCORE_HIGH(110.0);
 
         public final double position_degs;
