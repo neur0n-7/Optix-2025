@@ -42,8 +42,6 @@ public class ArmSubsystem extends SubsystemBase {
     private final LoggedMechanismLigament2d gripperLeft;
     private final LoggedMechanismLigament2d gripperRight;
     
-    private double timeElapsed = 0.0;
-
     public ArmSubsystem(ArmMotorIO motor, GripperIO gripper) {
         this.armMotor = motor;
         this.gripper = gripper;
@@ -153,8 +151,6 @@ public class ArmSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-
-        timeElapsed += 0.02;
                 
         TrapezoidProfile.State setpoint = pidController.getSetpoint();
 
@@ -189,12 +185,7 @@ public class ArmSubsystem extends SubsystemBase {
         // Send total voltage to arm motor
         double totalVolts = MathUtil.clamp(pidVolts + ffVolts, -12, 12);
         setMotorVoltage(totalVolts);
-/*
-        if (timeElapsed > 1){
-            setCargoState(CargoStates.LOADED);
-            setMotorVoltage(12);
-        }
- */
+
         SmartDashboard.putNumber("Arm/Current Degrees", currentDegrees);
         SmartDashboard.putNumber("Arm/Target Degrees", targetPositionDegrees);
 
@@ -213,25 +204,6 @@ public class ArmSubsystem extends SubsystemBase {
         SmartDashboard.putString("Arm/Position State", getPositionState().toString());
         SmartDashboard.putString("Arm/Gripper State", getGripperState().toString());
         SmartDashboard.putString("Arm/Cargo State", getCargoState().toString());
-
-        if (timeElapsed % 0.06 < 1e-6) {
-
-            System.out.println(String.format(
-                "Arm | Cur=%.2f deg Tar=%.2f deg At=%b | PID=%.2fV FF=%.2fV Tot=%.2fV | VelSP=%.2f VelAct=%.2f | AccSP=%.2f AccAct=%.2f | Pos=%s Cargo=%s",
-                currentDegrees,
-                targetPositionDegrees,
-                atPositionTarget(),
-                pidVolts,
-                ffVolts,
-                totalVolts,
-                setpointVelocity,
-                actualVelocityRads,
-                setpointAcceleration,
-                actualAccelerationRads,
-                getPositionState(),
-                getCargoState()
-            ));
-        }
     }
 
     // Update the LoggedMechanism2d
