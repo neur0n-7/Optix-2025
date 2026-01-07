@@ -19,13 +19,15 @@ import frc.robot.subsystems.arm.ArmConstants.GripperStates;
 import frc.robot.subsystems.arm.gripper.GripperIO;
 import frc.robot.subsystems.arm.motor.ArmMotorIO;
 
+/**
+ * Single-jointed arm subsystem class
+ * @author Anish Gupta
+ */
 public class ArmSubsystem extends SubsystemBase {
 
-    // Motor + gripper
     private final ArmMotorIO armMotor;
     private final GripperIO gripper;
 
-    // control
     private final ProfiledPIDController pidController;
     private final ArmFeedforward emptyFeedforward;
     private final ArmFeedforward loadedFeedforward;
@@ -34,10 +36,8 @@ public class ArmSubsystem extends SubsystemBase {
     private double lastActualVelocityRads = 0.0;
     private double targetPositionDegrees = 0.0;
     
-    // states
     private ArmPositionStates currentPositionState = ArmPositionStates.STOW;
 
-    // mech
     private final LoggedMechanism2d mech = new LoggedMechanism2d(4, 4);
     private final LoggedMechanismLigament2d armMech;
     private final LoggedMechanismLigament2d gripperLeft;
@@ -113,48 +113,77 @@ public class ArmSubsystem extends SubsystemBase {
         ); 
     }
 
-    // Set the target POSITION state of the arm e.g. ArmPositionStates.STOW
+    /**
+     * Set the target POSITION state of the arm
+     * e.g setTargetPositionState(ArmPositionStates.STOW) will set the target position to the arm to STOW.
+     */
     public void setTargetPositionState(ArmPositionStates targetPositionState) {
         pidController.setGoal(Units.degreesToRadians(targetPositionState.position_degs));
         targetPositionDegrees = targetPositionState.position_degs;
         currentPositionState = targetPositionState;
     }
 
-    // Set the gripper state to open/closed
+    /**
+     * Set the state of the grippper to open or closed.
+     * @param gripperState Target gripper state
+     */
     public void setGripperState(GripperStates gripperState){
         gripper.setGripperState(gripperState);
     }
 
-    // Set the cargo state to empty/loaded
+    /**
+     * Sets the cargo state (whether or not the robot is holding a cone) to the target state.
+     * @param cargoState Target CargoStates value- EMPTY or LOADED
+     */
     public void setCargoState(CargoStates cargoState){
         gripper.setCargoState(cargoState);
         armMotor.setSimArmMass(cargoState.isHoldingCone);
     }
 
-    // Return whether or not the arm is at the target position (degrees)
+    /**
+     * Get whether or not the arm is at its set target position.
+     * @return boolean representing whether or not at the target position
+     */
     public boolean atPositionTarget() {
         return pidController.atGoal();
     }
 
-    // Get the current position of the arm in degrees
+    /**
+     * Get the current position (angle) of the arm
+     * @return A double rpresenting the position of the arm in degrees.
+     */
     public double getPositionDegrees() {
         return armMotor.getPositionDegrees();
     }
 
-    // State getters
+    /**
+     * Get the target position state of the arm.
+     * @return An ArmPositionStates object representing the state.
+     */
     public ArmPositionStates getPositionState() {
         return currentPositionState;
     }
 
+    /**
+     * Get the current gripper state of the arm.
+     * @return A GripperStates object representing the state.
+     */
     public GripperStates getGripperState() {
         return gripper.getGripperState();
     }
 
+    /**
+     * Get the current cargo state of the arm (whether or not a cone is loaded)
+     * @return A CargoStates object representing the state.
+     */
     public CargoStates getCargoState() {
         return gripper.getCargoState();
     }
 
-    // Set the voltage of the arm motor
+    /**
+     * Send the passed number of volts to the arm's motor
+     * @param volts A double representing the number of volts
+     */
     public void setMotorVoltage(double volts){
         armMotor.setVoltage(MathUtil.clamp(volts, -12, 12));
     }
@@ -196,6 +225,7 @@ public class ArmSubsystem extends SubsystemBase {
         double totalVolts = MathUtil.clamp(pidVolts + ffVolts, -12, 12);
         setMotorVoltage(totalVolts);
 
+        // Logging
         SmartDashboard.putNumber("Arm/Current Degrees", currentDegrees);
         SmartDashboard.putNumber("Arm/Target Degrees", targetPositionDegrees);
 

@@ -50,7 +50,7 @@ public class ArmConstants {
         INTAKE(30.0),
         EJECT(15.0),
         SCORE_LOW(80.0),
-        SCORE_HIGH(110.0);
+        SCORE_HIGH(135.0);
 
         public final double position_degs;
 
