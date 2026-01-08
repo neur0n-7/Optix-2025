@@ -10,7 +10,6 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.subsystems.arm.ArmConstants.ArmPositionStates;
@@ -21,6 +20,7 @@ import frc.robot.subsystems.arm.motor.ArmMotorIO;
 
 /**
  * Single-jointed arm subsystem class
+ * 
  * @author Anish Gupta
  */
 public class ArmSubsystem extends SubsystemBase {
@@ -31,18 +31,26 @@ public class ArmSubsystem extends SubsystemBase {
     private final ProfiledPIDController pidController;
     private final ArmFeedforward emptyFeedforward;
     private final ArmFeedforward loadedFeedforward;
-    
+
     private double lastSetpointVelocity = 0.0;
     private double lastActualVelocityRads = 0.0;
     private double targetPositionDegrees = 0.0;
-    
+
     private ArmPositionStates currentPositionState = ArmPositionStates.STOW;
 
     private final LoggedMechanism2d mech = new LoggedMechanism2d(4, 4);
     private final LoggedMechanismLigament2d armMech;
     private final LoggedMechanismLigament2d gripperLeft;
     private final LoggedMechanismLigament2d gripperRight;
-    
+
+    /**
+     * Arm subsystem constructor.
+     * 
+     * @param motor   A RealArmMotor or SimArmMotor object that is the motor for the
+     *                single jointed arm.
+     * @param gripper A RealGripper or SimGripper object that opens/closes a real or
+     *                sim gripper
+     */
     public ArmSubsystem(ArmMotorIO motor, GripperIO gripper) {
         this.armMotor = motor;
         this.gripper = gripper;
@@ -52,13 +60,10 @@ public class ArmSubsystem extends SubsystemBase {
                 ArmConstants.kI,
                 ArmConstants.kD,
                 new TrapezoidProfile.Constraints(
-                    ArmConstants.maxEmptyVelocityRads,
-                    ArmConstants.maxEmptyAccelRads
-                )
-        );
+                        ArmConstants.maxEmptyVelocityRads,
+                        ArmConstants.maxEmptyAccelRads));
 
         lastSetpointVelocity = pidController.getSetpoint().velocity;
-
 
         pidController.setTolerance(Units.degreesToRadians(ArmConstants.PIDToleranceDegrees));
 
@@ -67,55 +72,41 @@ public class ArmSubsystem extends SubsystemBase {
                 ArmConstants.kS,
                 ArmConstants.kGEmpty,
                 ArmConstants.kVEmpty,
-                ArmConstants.kAEmpty
-        );
+                ArmConstants.kAEmpty);
 
         // FF for arm when holding cone
         loadedFeedforward = new ArmFeedforward(
-            ArmConstants.kS,
-            ArmConstants.kGLoaded,
-            ArmConstants.kVLoaded,
-            ArmConstants.kALoaded
-        );
+                ArmConstants.kS,
+                ArmConstants.kGLoaded,
+                ArmConstants.kVLoaded,
+                ArmConstants.kALoaded);
 
+        // Logged Mechanism 2D
         LoggedMechanismRoot2d root = mech.getRoot("arm", 2, 2);
-
-        Color8Bit orange = new Color8Bit(255, 165, 0);
 
         armMech = root.append(
                 new LoggedMechanismLigament2d(
                         "arm",
                         1.5,
-                        0,
-                        12,
-                        orange
-                )
-        );
+                        0));
 
         gripperLeft = armMech.append(
-            new LoggedMechanismLigament2d(
-                "gripperLeft",
-                0.3,
-                0,
-                12,
-                orange
-            )
-        );
+                new LoggedMechanismLigament2d(
+                        "gripperLeft",
+                        0.3,
+                        0));
 
         gripperRight = armMech.append(
-            new LoggedMechanismLigament2d(
-                "gripperRight",
-                0.3,
-                0,
-                12,
-                orange
-            )
-        ); 
+                new LoggedMechanismLigament2d(
+                        "gripperRight",
+                        0.3,
+                        0));
     }
 
     /**
      * Set the target POSITION state of the arm
-     * e.g setTargetPositionState(ArmPositionStates.STOW) will set the target position to the arm to STOW.
+     * e.g setTargetPositionState(ArmPositionStates.STOW) will set the target
+     * position to the arm to STOW.
      */
     public void setTargetPositionState(ArmPositionStates targetPositionState) {
         pidController.setGoal(Units.degreesToRadians(targetPositionState.position_degs));
@@ -125,23 +116,27 @@ public class ArmSubsystem extends SubsystemBase {
 
     /**
      * Set the state of the grippper to open or closed.
+     * 
      * @param gripperState Target gripper state
      */
-    public void setGripperState(GripperStates gripperState){
+    public void setGripperState(GripperStates gripperState) {
         gripper.setGripperState(gripperState);
     }
 
     /**
-     * Sets the cargo state (whether or not the robot is holding a cone) to the target state.
+     * Sets the cargo state (whether or not the robot is holding a cone) to the
+     * target state.
+     * 
      * @param cargoState Target CargoStates value- EMPTY or LOADED
      */
-    public void setCargoState(CargoStates cargoState){
+    public void setCargoState(CargoStates cargoState) {
         gripper.setCargoState(cargoState);
         armMotor.setSimArmMass(cargoState.isHoldingCone);
     }
 
     /**
      * Get whether or not the arm is at its set target position.
+     * 
      * @return boolean representing whether or not at the target position
      */
     public boolean atPositionTarget() {
@@ -150,6 +145,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     /**
      * Get the current position (angle) of the arm
+     * 
      * @return A double rpresenting the position of the arm in degrees.
      */
     public double getPositionDegrees() {
@@ -158,6 +154,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     /**
      * Get the target position state of the arm.
+     * 
      * @return An ArmPositionStates object representing the state.
      */
     public ArmPositionStates getPositionState() {
@@ -166,6 +163,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     /**
      * Get the current gripper state of the arm.
+     * 
      * @return A GripperStates object representing the state.
      */
     public GripperStates getGripperState() {
@@ -174,6 +172,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     /**
      * Get the current cargo state of the arm (whether or not a cone is loaded)
+     * 
      * @return A CargoStates object representing the state.
      */
     public CargoStates getCargoState() {
@@ -182,15 +181,16 @@ public class ArmSubsystem extends SubsystemBase {
 
     /**
      * Send the passed number of volts to the arm's motor
+     * 
      * @param volts A double representing the number of volts
      */
-    public void setMotorVoltage(double volts){
+    public void setMotorVoltage(double volts) {
         armMotor.setVoltage(MathUtil.clamp(volts, -12, 12));
     }
 
     @Override
     public void periodic() {
-                
+
         TrapezoidProfile.State setpoint = pidController.getSetpoint();
 
         // Setpoint velocity/acceleration
@@ -201,9 +201,10 @@ public class ArmSubsystem extends SubsystemBase {
         // Actual velocity/acceleration
         boolean holdingCone = gripper.getCargoState().isHoldingCone;
         double maxAccel = holdingCone ? ArmConstants.maxLoadedAccelRads : ArmConstants.maxEmptyAccelRads;
-        double maxVel   = holdingCone ? ArmConstants.maxLoadedVelocityRads : ArmConstants.maxEmptyVelocityRads;
+        double maxVel = holdingCone ? ArmConstants.maxLoadedVelocityRads : ArmConstants.maxEmptyVelocityRads;
         double actualVelocityRads = MathUtil.clamp(armMotor.getVelocityRadPerSec(), -maxVel, maxVel);
-        double actualAccelerationRads = MathUtil.clamp((actualVelocityRads - lastActualVelocityRads) / 0.02, -maxAccel, maxAccel);
+        double actualAccelerationRads = MathUtil.clamp((actualVelocityRads - lastActualVelocityRads) / 0.02, -maxAccel,
+                maxAccel);
         lastActualVelocityRads = actualVelocityRads;
 
         // PID
@@ -213,13 +214,14 @@ public class ArmSubsystem extends SubsystemBase {
 
         // FF
         double ffVolts;
-        if (holdingCone){
-            ffVolts = loadedFeedforward.calculate(Units.degreesToRadians(getPositionDegrees() - 90), setpointVelocity, setpointAcceleration);
+        if (holdingCone) {
+            ffVolts = loadedFeedforward.calculate(Units.degreesToRadians(getPositionDegrees() - 90), setpointVelocity,
+                    setpointAcceleration);
         } else {
-            ffVolts = emptyFeedforward.calculate(Units.degreesToRadians(getPositionDegrees() - 90), setpointVelocity, setpointAcceleration);
+            ffVolts = emptyFeedforward.calculate(Units.degreesToRadians(getPositionDegrees() - 90), setpointVelocity,
+                    setpointAcceleration);
         }
         ffVolts = MathUtil.clamp(ffVolts, -12, 12);
-
 
         // Send total voltage to arm motor
         double totalVolts = MathUtil.clamp(pidVolts + ffVolts, -12, 12);
@@ -246,8 +248,11 @@ public class ArmSubsystem extends SubsystemBase {
         SmartDashboard.putString("Arm/Cargo State", getCargoState().toString());
     }
 
-    // Update the LoggedMechanism2d
-    public void updateMechanism(){
+    /**
+     * Update the logged mechanism 2D in AdvantageScope
+     * to match the current arm angle and gripper state.
+     */
+     public void updateMechanism() {
         double armAngleDegrees = getPositionDegrees();
 
         // Currently angles are stored with 0 degrees pointing down.
@@ -261,7 +266,7 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     @Override
-    public void simulationPeriodic(){
+    public void simulationPeriodic() {
         armMotor.updateSimulation(0.02);
         updateMechanism();
     }
