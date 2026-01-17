@@ -29,7 +29,7 @@ public class RealArmMotor implements ArmMotorIO {
         // Returns degrees per second
         double motorRpm = encoder.getVelocity();
         double armDegreesPerMin = motorRpm * 360.0 / ArmConstants.gearing;
-        return Units.degreesToRadians(armDegreesPerMin / 60) ;
+        return Units.degreesToRadians(armDegreesPerMin / 60.0) ;
     }
 
     @Override
