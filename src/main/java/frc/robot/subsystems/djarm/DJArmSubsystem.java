@@ -82,17 +82,27 @@ public class DJArmSubsystem extends SubsystemBase{
     @Override
     public void periodic() {
         double shoulderRads = shoulderJoint.getPositionRads();
-        shoulderJoint.setVoltage(shoulderPID.calculate(shoulderRads));
+        double shoulderPidVolts = shoulderPID.calculate(shoulderRads);
+        shoulderJoint.setVoltage(shoulderPidVolts);
+
         double elbowRads = elbowJoint.getPositionRads();
-        elbowJoint.setVoltage(elbowPID.calculate(elbowRads));
+        double elbowPidVolts = elbowPID.calculate(elbowRads);
+        elbowJoint.setVoltage(elbowPidVolts);
 
         SmartDashboard.putBoolean("DJArm/Shoulder/AtSetpoint", shoulderPID.atSetpoint());
         SmartDashboard.putNumber("DJArm/Shoulder/Current Radians", shoulderRads);
         SmartDashboard.putNumber("DJArm/Shoulder/Target Radians", targetPose.pose.shoulderAngleRad());
+        SmartDashboard.putNumber("DJArm/Shoulder/Velocity", shoulderJoint.getVelocityRadPerSec());        
+        SmartDashboard.putNumber("DJArm/Shoulder/Volts PID", shoulderPidVolts);        
+        
         
         SmartDashboard.putBoolean("DJArm/Elbow/AtSetpoint", elbowPID.atSetpoint());
         SmartDashboard.putNumber("DJArm/Elbow/Current Radians", elbowRads);
         SmartDashboard.putNumber("DJArm/Elbow/Target Radians", targetPose.pose.elbowAngleRad());
+        SmartDashboard.putNumber("DJArm/Elbow/Velocity", elbowJoint.getVelocityRadPerSec());   
+        SmartDashboard.putNumber("DJArm/Elbow/Volts PID", elbowPidVolts);        
+     
+
 
         SmartDashboard.putString("DJArm/Target Pose", targetPose.toString());
         SmartDashboard.putData("DJArm/mech", mech2d);
