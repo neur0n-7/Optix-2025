@@ -4,7 +4,7 @@ public class DJArmKinematics {
     public static DJArmPose calculate(double xTarget, double yTarget) {
 
         double L1 = DJArmConstants.shoulderArmLengthMeters;
-        double L2 = DJArmConstants.elbowLengthMeters;
+        double L2 = DJArmConstants.elbowArmLengthMeters;
 
         double c2 = (xTarget*xTarget + yTarget*yTarget - L1*L1 - L2*L2) / (2*L1*L2);
         double s2 = Math.sqrt(1 - c2*c2); // elbow-down solution

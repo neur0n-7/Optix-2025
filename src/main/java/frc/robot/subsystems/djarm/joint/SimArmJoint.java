@@ -25,7 +25,7 @@ public class SimArmJoint implements JointIO {
                 jointLengthMeters,
                 Units.degreesToRadians(-360.0),
                 Units.degreesToRadians(360.0),
-                true,
+                false,
                 Units.degreesToRadians(0.0)
         );
     }

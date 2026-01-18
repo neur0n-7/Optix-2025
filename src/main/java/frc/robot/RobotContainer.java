@@ -9,6 +9,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.arm.EjectCone;
 import frc.robot.commands.arm.IntakeCone;
 import frc.robot.commands.arm.ScoreCone;
+import frc.robot.commands.djarm.SetTargetPose;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,6 +21,10 @@ import frc.robot.subsystems.arm.gripper.RealGripper;
 import frc.robot.subsystems.arm.gripper.SimGripper;
 import frc.robot.subsystems.arm.motor.RealArmMotor;
 import frc.robot.subsystems.arm.motor.SimArmMotor;
+import frc.robot.subsystems.djarm.DJArmConstants;
+import frc.robot.subsystems.djarm.DJArmSubsystem;
+import frc.robot.subsystems.djarm.joint.RealArmJoint;
+import frc.robot.subsystems.djarm.joint.SimArmJoint;
 import frc.robot.commands.swerve.JoystickDrive;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,6 +70,10 @@ public class RobotContainer {
 	private final ScoreCone m_ScoreConeHigh;
 	private final ScoreCone m_ScoreConeLow;
 	
+	// DOUBLE JOINTED ARM
+	private final DJArmSubsystem m_DjArmSubsystem;
+	private final SetTargetPose m_ExtendDJArm;
+	private final SetTargetPose m_StowDJArm;
 
 	private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
 
@@ -77,7 +86,9 @@ public class RobotContainer {
 		subsystemEnabled.put("SWERVE", false);
 		subsystemEnabled.put("ELEVATOR", false);
 		subsystemEnabled.put("DRIVE", false);
-		subsystemEnabled.put("ARM", true);
+		subsystemEnabled.put("ARM", false);
+		subsystemEnabled.put("DJARM", true);
+		
 		///////////////////////////////////////////////////////////////////////////////////////////
 
 		// DRIVE
@@ -176,6 +187,44 @@ public class RobotContainer {
 			m_EjectCone = null;
 		}
 
+		// DOUBLE JOINTED ARM
+		if (subsystemEnabled.getOrDefault("DJARM", false)){
+
+
+			if (RobotBase.isSimulation()){
+				m_DjArmSubsystem = new DJArmSubsystem(
+					// Shoulder	
+					new SimArmJoint(
+						DJArmConstants.shoulderReduction,
+						DJArmConstants.shoulderArmMassKg,
+						DJArmConstants.shoulderArmLengthMeters
+					),
+
+					// Elbow
+					new SimArmJoint(
+						DJArmConstants.elbowReduction, 
+						DJArmConstants.elbowArmMassKg,
+						DJArmConstants.elbowArmLengthMeters
+					)
+				);
+			} else {
+				m_DjArmSubsystem = new DJArmSubsystem(
+					// Shoulder
+					new RealArmJoint(OperatorConstants.shoulderJointCanId, DJArmConstants.shoulderReduction),
+					// Elbow
+					new RealArmJoint(OperatorConstants.elbowJointCanId, DJArmConstants.elbowReduction)
+				);
+			}
+
+			m_ExtendDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmConstants.ArmPoses.EXTENDED.pose);
+			m_StowDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmConstants.ArmPoses.STOW.pose);
+			
+		} else {
+			m_DjArmSubsystem = null;
+			m_ExtendDJArm = null;
+			m_StowDJArm = null;
+		}
+
 		configureBindings();
 	}
 
@@ -221,11 +270,18 @@ public class RobotContainer {
 			m_driverController.y().onTrue(m_GoTo90Degrees);
 		}
 
+		// ARM
 		if (subsystemEnabled.getOrDefault("ARM", false)) {
 			m_driverController.a().onTrue(m_IntakeCone);
 			m_driverController.b().onTrue(m_EjectCone);
 			m_driverController.x().onTrue(m_ScoreConeLow);
 			m_driverController.y().onTrue(m_ScoreConeHigh);
+		}
+		
+		// DOUBLE JOINTED ARM
+		if (subsystemEnabled.getOrDefault("DJARM", false)) {
+			m_driverController.x().onTrue(m_ExtendDJArm);
+			m_driverController.y().onTrue(m_StowDJArm);
 		}
 	}
 

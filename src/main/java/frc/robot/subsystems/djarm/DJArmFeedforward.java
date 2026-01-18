@@ -17,16 +17,16 @@ public class DJArmFeedforward {
         double elbowArmTorque = DJArmConstants.elbowArmMassKg
                 * g
                 * (DJArmConstants.shoulderArmLengthMeters
-                        + DJArmConstants.elbowLengthMeters / 2.0)
+                        + DJArmConstants.elbowArmLengthMeters / 2.0)
                 * Math.cos(shoulderAngleRad);
 
         double totalTorqueNm = shoulderArmTorque + elbowArmTorque;
         double kGVolts = torqueToVolts(totalTorqueNm, DJArmConstants.shoulderReduction);
 
         return kGVolts
-                + DJArmConstants.kS * Math.signum(shoulderVelocityRadPerSec)
-                + DJArmConstants.kV * shoulderVelocityRadPerSec
-                + DJArmConstants.kA * shoulderAccelRadPerSec2;
+                + DJArmConstants.shoulderkS * Math.signum(shoulderVelocityRadPerSec)
+                + DJArmConstants.shoulderkV * shoulderVelocityRadPerSec
+                + DJArmConstants.shoulderkA * shoulderAccelRadPerSec2;
     }
 
     public static double calculateElbow(
@@ -39,7 +39,7 @@ public class DJArmFeedforward {
 
         double elbowArmTorque = DJArmConstants.elbowArmMassKg
                 * g
-                * (DJArmConstants.elbowLengthMeters / 2.0)
+                * (DJArmConstants.elbowArmLengthMeters / 2.0)
                 * Math.cos(absoluteElbowAngle);
 
         double totalTorqueNm = elbowArmTorque;
@@ -47,9 +47,9 @@ public class DJArmFeedforward {
         double kGVolts = torqueToVolts(totalTorqueNm, DJArmConstants.elbowReduction);
 
         return kGVolts
-                + DJArmConstants.kS * Math.signum(elbowVelocityRadPerSec)
-                + DJArmConstants.kV * elbowVelocityRadPerSec
-                + DJArmConstants.kA * elbowAccelRadPerSec2;
+                + DJArmConstants.elbowkS * Math.signum(elbowVelocityRadPerSec)
+                + DJArmConstants.elbowkV * elbowVelocityRadPerSec
+                + DJArmConstants.elbowkA * elbowAccelRadPerSec2;
     }
 
 
