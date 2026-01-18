@@ -37,13 +37,14 @@ public class DJArmConstants {
     public static final double PIDTolerance = Units.degreesToRadians(1.0);
 
     // Positions
-    public enum ArmPoses {
-        EXTENDED(DJArmKinematics.calculate(0.5, 0.5)),
-        STOW(DJArmKinematics.calculate(0, shoulderArmLengthMeters - elbowArmLengthMeters));
+    public enum DJArmStoredPoses {
+        STOW(DJArmKinematics.calculate(0, shoulderArmLengthMeters - elbowArmLengthMeters)),
+        EXTENDED(DJArmKinematics.calculate(1.0, 0)),
+        HIGH(DJArmKinematics.calculate(0.6, 0.6));
 
         public final DJArmPose pose;
 
-        ArmPoses(DJArmPose pose){
+        DJArmStoredPoses(DJArmPose pose){
             this.pose = pose;
         }
         

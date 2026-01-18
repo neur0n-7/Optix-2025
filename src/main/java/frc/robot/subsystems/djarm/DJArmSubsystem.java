@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.djarm.DJArmConstants.DJArmStoredPoses;
 import frc.robot.subsystems.djarm.joint.JointIO;
 
 public class DJArmSubsystem extends SubsystemBase{
@@ -17,7 +18,7 @@ public class DJArmSubsystem extends SubsystemBase{
     private final PIDController shoulderPID;
     private final PIDController elbowPID;
 
-    private DJArmPose targetPose;
+    private DJArmStoredPoses targetPose;
 
     private final Mechanism2d mech2d;
     private final MechanismLigament2d shoulderLigament;
@@ -42,7 +43,7 @@ public class DJArmSubsystem extends SubsystemBase{
         shoulderPID.setTolerance(DJArmConstants.PIDTolerance);
         elbowPID.setTolerance(DJArmConstants.PIDTolerance);
 
-        targetPose = DJArmKinematics.calculate(0, DJArmConstants.shoulderArmLengthMeters-DJArmConstants.elbowArmLengthMeters);
+        targetPose = DJArmConstants.DJArmStoredPoses.STOW;
 
         mech2d = new Mechanism2d(3.0, 3.0);
 
@@ -68,10 +69,10 @@ public class DJArmSubsystem extends SubsystemBase{
             );
     }
 
-    public void setTargetPose(DJArmPose pose){
+    public void setTargetPose(DJArmStoredPoses pose){
         targetPose = pose;
-        shoulderPID.setSetpoint(targetPose.shoulderAngleRad());
-        elbowPID.setSetpoint(targetPose.elbowAngleRad());
+        shoulderPID.setSetpoint(targetPose.pose.shoulderAngleRad());
+        elbowPID.setSetpoint(targetPose.pose.elbowAngleRad());
     }
 
     public boolean atTarget(){
@@ -87,12 +88,13 @@ public class DJArmSubsystem extends SubsystemBase{
 
         SmartDashboard.putBoolean("DJArm/Shoulder/AtSetpoint", shoulderPID.atSetpoint());
         SmartDashboard.putNumber("DJArm/Shoulder/Current Radians", shoulderRads);
-        SmartDashboard.putNumber("DJArm/Shoulder/Target Radians", targetPose.shoulderAngleRad());
+        SmartDashboard.putNumber("DJArm/Shoulder/Target Radians", targetPose.pose.shoulderAngleRad());
         
         SmartDashboard.putBoolean("DJArm/Elbow/AtSetpoint", elbowPID.atSetpoint());
         SmartDashboard.putNumber("DJArm/Elbow/Current Radians", elbowRads);
-        SmartDashboard.putNumber("DJArm/Elbow/Target Radians", targetPose.elbowAngleRad());
+        SmartDashboard.putNumber("DJArm/Elbow/Target Radians", targetPose.pose.elbowAngleRad());
 
+        SmartDashboard.putString("DJArm/Target Pose", targetPose.toString());
         SmartDashboard.putData("DJArm/mech", mech2d);
 
         shoulderLigament.setAngle(Units.radiansToDegrees(shoulderRads));

@@ -1,15 +1,15 @@
 package frc.robot.commands.djarm;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.djarm.DJArmPose;
 import frc.robot.subsystems.djarm.DJArmSubsystem;
+import frc.robot.subsystems.djarm.DJArmConstants.DJArmStoredPoses;
 
 public class SetTargetPose extends Command {
 
     private final DJArmSubsystem djarm;
-    private final DJArmPose pose;
+    private final DJArmStoredPoses pose;
 
-    public SetTargetPose(DJArmSubsystem djarm, DJArmPose pose) {
+    public SetTargetPose(DJArmSubsystem djarm, DJArmStoredPoses pose) {
         this.djarm = djarm;
         this.pose = pose;
         addRequirements(djarm);

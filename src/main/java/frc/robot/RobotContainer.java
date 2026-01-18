@@ -22,6 +22,7 @@ import frc.robot.subsystems.arm.gripper.SimGripper;
 import frc.robot.subsystems.arm.motor.RealArmMotor;
 import frc.robot.subsystems.arm.motor.SimArmMotor;
 import frc.robot.subsystems.djarm.DJArmConstants;
+import frc.robot.subsystems.djarm.DJArmConstants.DJArmStoredPoses;
 import frc.robot.subsystems.djarm.DJArmSubsystem;
 import frc.robot.subsystems.djarm.joint.RealArmJoint;
 import frc.robot.subsystems.djarm.joint.SimArmJoint;
@@ -29,6 +30,7 @@ import frc.robot.commands.swerve.JoystickDrive;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
+
 import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.commands.drive.GoToDegrees;
@@ -74,6 +76,8 @@ public class RobotContainer {
 	private final DJArmSubsystem m_DjArmSubsystem;
 	private final SetTargetPose m_ExtendDJArm;
 	private final SetTargetPose m_StowDJArm;
+	private final SetTargetPose m_HighDJArm;
+	
 
 	private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
 
@@ -216,13 +220,16 @@ public class RobotContainer {
 				);
 			}
 
-			m_ExtendDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmConstants.ArmPoses.EXTENDED.pose);
-			m_StowDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmConstants.ArmPoses.STOW.pose);
+			m_ExtendDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmStoredPoses.EXTENDED);
+			m_StowDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmStoredPoses.STOW);
+			m_HighDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmStoredPoses.HIGH);
+			
 			
 		} else {
 			m_DjArmSubsystem = null;
 			m_ExtendDJArm = null;
 			m_StowDJArm = null;
+			m_HighDJArm = null;
 		}
 
 		configureBindings();
@@ -280,8 +287,9 @@ public class RobotContainer {
 		
 		// DOUBLE JOINTED ARM
 		if (subsystemEnabled.getOrDefault("DJARM", false)) {
+			m_driverController.a().onTrue(m_StowDJArm);
+			m_driverController.b().onTrue(m_HighDJArm);
 			m_driverController.x().onTrue(m_ExtendDJArm);
-			m_driverController.y().onTrue(m_StowDJArm);
 		}
 	}
 
