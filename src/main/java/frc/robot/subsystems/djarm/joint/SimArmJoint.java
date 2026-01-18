@@ -16,7 +16,7 @@ public class SimArmJoint implements JointIO {
         double jointLengthMeters
     ) {
 
-        double momentOfInertia = jointMassKg * Math.pow(jointLengthMeters, 2);
+        double momentOfInertia = (1.0/3.0) * jointMassKg * Math.pow(jointLengthMeters, 2);
 
         sim = new SingleJointedArmSim(
                 DCMotor.getNEO(1),
@@ -45,5 +45,9 @@ public class SimArmJoint implements JointIO {
     public double getPositionRads() {
         return sim.getAngleRads();
     }
+
+    public void updateSimulation(double dtSeconds){
+        sim.update(dtSeconds);
+    }  
 
 }
