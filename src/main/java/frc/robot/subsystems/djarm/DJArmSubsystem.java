@@ -18,7 +18,7 @@ public class DJArmSubsystem extends SubsystemBase{
     private final PIDController shoulderPID;
     private final PIDController elbowPID;
 
-    private DJArmStoredPoses targetPose;
+    private DJArmPose targetPose;
 
     private final Mechanism2d mech2d;
     private final MechanismLigament2d shoulderLigament;
@@ -43,12 +43,12 @@ public class DJArmSubsystem extends SubsystemBase{
         shoulderPID.setTolerance(DJArmConstants.PIDTolerance);
         elbowPID.setTolerance(DJArmConstants.PIDTolerance);
 
-        targetPose = DJArmConstants.DJArmStoredPoses.STOW;
-
-        mech2d = new Mechanism2d(3.0, 3.0);
+        setTargetPose(DJArmStoredPoses.STOW.pose);
+    
+        mech2d = new Mechanism2d(2.5, 2.0);
 
         MechanismRoot2d root =
-            mech2d.getRoot("ShoulderRoot", 1.5, 0.5);
+            mech2d.getRoot("ShoulderRoot", 1.25, 0.75);
 
         shoulderLigament =
             root.append(
@@ -69,10 +69,18 @@ public class DJArmSubsystem extends SubsystemBase{
             );
     }
 
-    public void setTargetPose(DJArmStoredPoses pose){
-        targetPose = pose;
-        shoulderPID.setSetpoint(targetPose.pose.shoulderAngleRad());
-        elbowPID.setSetpoint(targetPose.pose.elbowAngleRad());
+    public void setTargetPose(DJArmPose pose){
+        if (DJArmKinematics.isValid(pose.xTarget(), pose.yTarget())){
+            targetPose = pose;
+            shoulderPID.setSetpoint(targetPose.shoulderAngleRad());
+            elbowPID.setSetpoint(targetPose.elbowAngleRad());
+        }
+    }
+
+    public void shiftTargetPose(double xShift, double yShift){
+        double xNew = targetPose.xTarget() + xShift;
+        double yNew = targetPose.yTarget() + yShift;
+        setTargetPose(DJArmKinematics.calculate(xNew, yNew));
     }
 
     public boolean atTarget(){
@@ -91,20 +99,20 @@ public class DJArmSubsystem extends SubsystemBase{
 
         SmartDashboard.putBoolean("DJArm/Shoulder/AtSetpoint", shoulderPID.atSetpoint());
         SmartDashboard.putNumber("DJArm/Shoulder/Current Radians", shoulderRads);
-        SmartDashboard.putNumber("DJArm/Shoulder/Target Radians", targetPose.pose.shoulderAngleRad());
+        SmartDashboard.putNumber("DJArm/Shoulder/Target Radians", targetPose.shoulderAngleRad());
         SmartDashboard.putNumber("DJArm/Shoulder/Velocity", shoulderJoint.getVelocityRadPerSec());        
         SmartDashboard.putNumber("DJArm/Shoulder/Volts PID", shoulderPidVolts);        
         
-        
         SmartDashboard.putBoolean("DJArm/Elbow/AtSetpoint", elbowPID.atSetpoint());
         SmartDashboard.putNumber("DJArm/Elbow/Current Radians", elbowRads);
-        SmartDashboard.putNumber("DJArm/Elbow/Target Radians", targetPose.pose.elbowAngleRad());
+        SmartDashboard.putNumber("DJArm/Elbow/Target Radians", targetPose.elbowAngleRad());
         SmartDashboard.putNumber("DJArm/Elbow/Velocity", elbowJoint.getVelocityRadPerSec());   
-        SmartDashboard.putNumber("DJArm/Elbow/Volts PID", elbowPidVolts);        
+        SmartDashboard.putNumber("DJArm/Elbow/Volts PID", elbowPidVolts);       
+        
+        SmartDashboard.putNumber("DJArm/EndEffector X", targetPose.xTarget());
+        SmartDashboard.putNumber("DJArm/EndEffector Y", targetPose.yTarget());
+        
      
-
-
-        SmartDashboard.putString("DJArm/Target Pose", targetPose.toString());
         SmartDashboard.putData("DJArm/mech", mech2d);
 
         shoulderLigament.setAngle(Units.radiansToDegrees(shoulderRads));

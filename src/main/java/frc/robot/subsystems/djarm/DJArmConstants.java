@@ -39,7 +39,7 @@ public class DJArmConstants {
     // Positions
     public enum DJArmStoredPoses {
         STOW(DJArmKinematics.calculate(0, shoulderArmLengthMeters - elbowArmLengthMeters)),
-        EXTENDED(DJArmKinematics.calculate(1.0, 0)),
+        EXTENDED(DJArmKinematics.calculate(1.0, 0.3)),
         HIGH(DJArmKinematics.calculate(0.6, 0.6));
 
         public final DJArmPose pose;

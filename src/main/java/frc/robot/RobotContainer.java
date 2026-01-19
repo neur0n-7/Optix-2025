@@ -9,6 +9,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.arm.EjectCone;
 import frc.robot.commands.arm.IntakeCone;
 import frc.robot.commands.arm.ScoreCone;
+import frc.robot.commands.djarm.JoystickArm;
 import frc.robot.commands.djarm.SetTargetPose;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -77,6 +78,7 @@ public class RobotContainer {
 	private final SetTargetPose m_ExtendDJArm;
 	private final SetTargetPose m_StowDJArm;
 	private final SetTargetPose m_HighDJArm;
+	private final JoystickArm m_JoystickArm;
 	
 
 	private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
@@ -220,9 +222,14 @@ public class RobotContainer {
 				);
 			}
 
-			m_ExtendDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmStoredPoses.EXTENDED);
-			m_StowDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmStoredPoses.STOW);
-			m_HighDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmStoredPoses.HIGH);
+			m_ExtendDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmStoredPoses.EXTENDED.pose);
+			m_StowDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmStoredPoses.STOW.pose);
+			m_HighDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmStoredPoses.HIGH.pose);
+			
+			DoubleSupplier xTargetSupplier = () -> m_driverController.getLeftX() / 30.0;
+			DoubleSupplier yTargetSupplier = () -> -m_driverController.getLeftY() / 30.0;
+			m_JoystickArm = new JoystickArm(m_DjArmSubsystem, xTargetSupplier, yTargetSupplier);
+
 			
 			
 		} else {
@@ -230,6 +237,7 @@ public class RobotContainer {
 			m_ExtendDJArm = null;
 			m_StowDJArm = null;
 			m_HighDJArm = null;
+			m_JoystickArm = null;
 		}
 
 		configureBindings();
@@ -256,6 +264,12 @@ public class RobotContainer {
 		 * - A to intake cone
 		 * - X to score cone (low)
 		 * - Y to score cone (high)
+		 * 
+		 * DOUBLE JOINTED ARM
+		 * - A to stow arm
+		 * - B to set arm to "high position"
+		 * - X to set arm to "low position"
+		 * - Left joystick to manually control position
 		 */
 
 		// SWERVE
@@ -290,6 +304,7 @@ public class RobotContainer {
 			m_driverController.a().onTrue(m_StowDJArm);
 			m_driverController.b().onTrue(m_HighDJArm);
 			m_driverController.x().onTrue(m_ExtendDJArm);
+			m_DjArmSubsystem.setDefaultCommand(m_JoystickArm);
 		}
 	}
 
