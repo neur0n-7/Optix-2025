@@ -46,6 +46,9 @@ public final class Constants {
     // DOUBLE JOINTED ARM
     public static final int shoulderJointCanId = 21;
     public static final int elbowJointCanId = 22;
+    public static final PneumaticsModuleType endEffectorModuleType = PneumaticsModuleType.CTREPCM;
+    public static final int endEffectorChannel = 2;
+
     
 
   }

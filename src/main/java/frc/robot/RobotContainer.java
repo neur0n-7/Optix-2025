@@ -9,8 +9,10 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.arm.EjectCone;
 import frc.robot.commands.arm.IntakeCone;
 import frc.robot.commands.arm.ScoreCone;
+import frc.robot.commands.djarm.FloorIntake;
 import frc.robot.commands.djarm.JoystickArm;
-import frc.robot.commands.djarm.SetTargetPose;
+import frc.robot.commands.djarm.ScoreHigh;
+import frc.robot.commands.djarm.ToggleEndEffector;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,11 +25,13 @@ import frc.robot.subsystems.arm.gripper.SimGripper;
 import frc.robot.subsystems.arm.motor.RealArmMotor;
 import frc.robot.subsystems.arm.motor.SimArmMotor;
 import frc.robot.subsystems.djarm.DJArmConstants;
-import frc.robot.subsystems.djarm.DJArmConstants.DJArmStoredPoses;
+import frc.robot.subsystems.djarm.endeffector.RealEndEffector;
+import frc.robot.subsystems.djarm.endeffector.SimEndEffector;
 import frc.robot.subsystems.djarm.DJArmSubsystem;
 import frc.robot.subsystems.djarm.joint.RealArmJoint;
 import frc.robot.subsystems.djarm.joint.SimArmJoint;
 import frc.robot.commands.swerve.JoystickDrive;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
@@ -72,14 +76,13 @@ public class RobotContainer {
 	private final IntakeCone m_IntakeCone;
 	private final ScoreCone m_ScoreConeHigh;
 	private final ScoreCone m_ScoreConeLow;
-	
+
 	// DOUBLE JOINTED ARM
 	private final DJArmSubsystem m_DjArmSubsystem;
-	private final SetTargetPose m_ExtendDJArm;
-	private final SetTargetPose m_StowDJArm;
-	private final SetTargetPose m_HighDJArm;
+	private final ScoreHigh m_ScoreHigh;
+	private final FloorIntake m_FloorIntake;
 	private final JoystickArm m_JoystickArm;
-	
+	private final ToggleEndEffector m_ToggleEndEffector;
 
 	private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
 
@@ -88,18 +91,18 @@ public class RobotContainer {
 
 	public RobotContainer() {
 
-		// ENABLE SUBSYTEMS //////////////////////////////////////////////////////////////////////
+		// ENABLE SUBSYTEMS
+		// //////////////////////////////////////////////////////////////////////
 		subsystemEnabled.put("SWERVE", false);
 		subsystemEnabled.put("ELEVATOR", false);
 		subsystemEnabled.put("DRIVE", false);
 		subsystemEnabled.put("ARM", false);
 		subsystemEnabled.put("DJARM", true);
-		
+
 		///////////////////////////////////////////////////////////////////////////////////////////
 
 		// DRIVE
 		if (subsystemEnabled.getOrDefault("DRIVE", false)) {
-
 
 			if (RobotBase.isSimulation()) {
 				m_DriveSubsystem = new DriveSubsystem(new SimNeoMotor());
@@ -110,7 +113,6 @@ public class RobotContainer {
 			m_GoTo90Degrees = new GoToDegrees(m_DriveSubsystem, 90);
 			m_GoTo0Degrees = new GoToDegrees(m_DriveSubsystem, 0);
 
-
 		} else {
 			m_DriveSubsystem = null;
 			m_GoTo90Degrees = null;
@@ -120,17 +122,16 @@ public class RobotContainer {
 		// ELEVATOR
 		if (subsystemEnabled.getOrDefault("ELEVATOR", false)) {
 
-
-			if (RobotBase.isSimulation()){
+			if (RobotBase.isSimulation()) {
 				m_ElevatorSubsystem = new ElevatorSubsystem(new SimElevatorMotor());
 			} else {
-				m_ElevatorSubsystem = new ElevatorSubsystem(new RealElevatorMotor(Constants.OperatorConstants.elevatorMotorCanId, false));
+				m_ElevatorSubsystem = new ElevatorSubsystem(
+						new RealElevatorMotor(Constants.OperatorConstants.elevatorMotorCanId, false));
 			}
-	
+
 			m_SetElevatorLowest = new SetElevatorState(m_ElevatorSubsystem, ElevatorConstants.ElevatorStates.LOWEST);
 			m_SetElevatorMiddle = new SetElevatorState(m_ElevatorSubsystem, ElevatorConstants.ElevatorStates.MIDDLE);
 			m_SetElevatorHighest = new SetElevatorState(m_ElevatorSubsystem, ElevatorConstants.ElevatorStates.HIGHEST);
-		
 
 		} else {
 			m_ElevatorSubsystem = null;
@@ -141,7 +142,6 @@ public class RobotContainer {
 
 		// SWERVE
 		if (subsystemEnabled.getOrDefault("SWERVE", false)) {
-
 
 			m_SwerveSubsystem = new SwerveSubsystem(RobotBase.isReal());
 
@@ -159,7 +159,6 @@ public class RobotContainer {
 
 			m_JoystickDrive = new JoystickDrive(m_SwerveSubsystem, xSpeedSupplier, ySpeedSupplier, rotSpeedSupplier);
 
-
 		} else {
 			m_SwerveSubsystem = null;
 			m_JoystickDrive = null;
@@ -169,22 +168,22 @@ public class RobotContainer {
 		}
 
 		// ARM
-		if (subsystemEnabled.getOrDefault("ARM", false)){
+		if (subsystemEnabled.getOrDefault("ARM", false)) {
 
-
-			if (RobotBase.isSimulation()){
+			if (RobotBase.isSimulation()) {
 				m_ArmSubsystem = new ArmSubsystem(new SimArmMotor(), new SimGripper());
 			} else {
 				m_ArmSubsystem = new ArmSubsystem(
-					new RealArmMotor(Constants.OperatorConstants.armMotorCanId), 
-					new RealGripper(Constants.OperatorConstants.gripperModuleType, Constants.OperatorConstants.gripperChannel));
+						new RealArmMotor(Constants.OperatorConstants.armMotorCanId),
+						new RealGripper(Constants.OperatorConstants.gripperModuleType,
+								Constants.OperatorConstants.gripperChannel));
 			}
 
 			m_IntakeCone = new IntakeCone(m_ArmSubsystem);
 			m_ScoreConeHigh = new ScoreCone(m_ArmSubsystem, ArmPositionStates.SCORE_HIGH);
 			m_ScoreConeLow = new ScoreCone(m_ArmSubsystem, ArmPositionStates.SCORE_LOW);
 			m_EjectCone = new EjectCone(m_ArmSubsystem);
-			
+
 		} else {
 			m_ArmSubsystem = null;
 			m_IntakeCone = null;
@@ -194,50 +193,50 @@ public class RobotContainer {
 		}
 
 		// DOUBLE JOINTED ARM
-		if (subsystemEnabled.getOrDefault("DJARM", false)){
+		if (subsystemEnabled.getOrDefault("DJARM", false)) {
 
-
-			if (RobotBase.isSimulation()){
+			if (RobotBase.isSimulation()) {
 				m_DjArmSubsystem = new DJArmSubsystem(
-					// Shoulder	
-					new SimArmJoint(
-						DJArmConstants.shoulderReduction,
-						DJArmConstants.shoulderArmMassKg,
-						DJArmConstants.shoulderArmLengthMeters
-					),
+						// Shoulder
+						new SimArmJoint(
+								DJArmConstants.shoulderReduction,
+								DJArmConstants.shoulderArmMassKg,
+								DJArmConstants.shoulderArmLengthMeters),
 
-					// Elbow
-					new SimArmJoint(
-						DJArmConstants.elbowReduction, 
-						DJArmConstants.elbowArmMassKg,
-						DJArmConstants.elbowArmLengthMeters
-					)
-				);
+						// Elbow
+						new SimArmJoint(
+								DJArmConstants.elbowReduction,
+								DJArmConstants.elbowArmMassKg,
+								DJArmConstants.elbowArmLengthMeters),
+
+						// End Effector
+						new SimEndEffector());
 			} else {
 				m_DjArmSubsystem = new DJArmSubsystem(
-					// Shoulder
-					new RealArmJoint(OperatorConstants.shoulderJointCanId, DJArmConstants.shoulderReduction),
-					// Elbow
-					new RealArmJoint(OperatorConstants.elbowJointCanId, DJArmConstants.elbowReduction)
-				);
+						// Shoulder
+						new RealArmJoint(OperatorConstants.shoulderJointCanId, DJArmConstants.shoulderReduction),
+						// Elbow
+						new RealArmJoint(OperatorConstants.elbowJointCanId, DJArmConstants.elbowReduction),
+						// End effector
+						new RealEndEffector(OperatorConstants.endEffectorModuleType,
+								OperatorConstants.endEffectorChannel));
 			}
 
-			m_ExtendDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmStoredPoses.EXTENDED.pose);
-			m_StowDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmStoredPoses.STOW.pose);
-			m_HighDJArm = new SetTargetPose(m_DjArmSubsystem, DJArmStoredPoses.HIGH.pose);
-			
+			m_ScoreHigh = new ScoreHigh(m_DjArmSubsystem);
+			m_FloorIntake = new FloorIntake(m_DjArmSubsystem);
+
+			// manual controls
+			m_ToggleEndEffector = new ToggleEndEffector(m_DjArmSubsystem);
 			DoubleSupplier xTargetSupplier = () -> m_driverController.getLeftX() / 30.0;
 			DoubleSupplier yTargetSupplier = () -> -m_driverController.getLeftY() / 30.0;
 			m_JoystickArm = new JoystickArm(m_DjArmSubsystem, xTargetSupplier, yTargetSupplier);
 
-			
-			
 		} else {
 			m_DjArmSubsystem = null;
-			m_ExtendDJArm = null;
-			m_StowDJArm = null;
-			m_HighDJArm = null;
+			m_ScoreHigh = null;
+			m_FloorIntake = null;
 			m_JoystickArm = null;
+			m_ToggleEndEffector = null;
 		}
 
 		configureBindings();
@@ -269,6 +268,7 @@ public class RobotContainer {
 		 * - A to stow arm
 		 * - B to set arm to "high position"
 		 * - X to set arm to "low position"
+		 * - Y to toggle end effector state
 		 * - Left joystick to manually control position
 		 */
 
@@ -298,12 +298,12 @@ public class RobotContainer {
 			m_driverController.x().onTrue(m_ScoreConeLow);
 			m_driverController.y().onTrue(m_ScoreConeHigh);
 		}
-		
+
 		// DOUBLE JOINTED ARM
 		if (subsystemEnabled.getOrDefault("DJARM", false)) {
-			m_driverController.a().onTrue(m_StowDJArm);
-			m_driverController.b().onTrue(m_HighDJArm);
-			m_driverController.x().onTrue(m_ExtendDJArm);
+			m_driverController.a().onTrue(m_FloorIntake);
+			m_driverController.b().onTrue(m_ScoreHigh);
+			m_driverController.y().onTrue(m_ToggleEndEffector);
 			m_DjArmSubsystem.setDefaultCommand(m_JoystickArm);
 		}
 	}
